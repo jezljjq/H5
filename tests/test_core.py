@@ -60,7 +60,7 @@ class ConfigTests(unittest.TestCase):
                 window_keyword="斗罗大陆H5",
                 default_threshold=0.91,
                 default_retries=2,
-                window_task_bindings={"斗罗大陆H5-2": ["方案1", "神界中枢刷怪"]},
+                window_task_bindings={"斗罗大陆H5-2": ["方案1", "神界中枢刷怪", "flow"]},
                 selected_plan="方案1",
                 selected_task="神界中枢刷怪",
                 task_plans=[
@@ -94,7 +94,29 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual(loaded.flow[0].template, "entry.png")
             self.assertEqual(loaded.selected_task, "神界中枢刷怪")
             self.assertEqual(loaded.task_plans[0].tasks[0].flow[0].template, "shenjie.png")
-            self.assertEqual(loaded.window_task_bindings["斗罗大陆H5-2"], ["方案1", "神界中枢刷怪"])
+            self.assertEqual(loaded.window_task_bindings["斗罗大陆H5-2"], ["方案1", "神界中枢刷怪", "flow"])
+
+    def test_legacy_window_task_binding_loads_with_flow_task_type(self):
+        config = AppConfig.from_dict({"window_task_bindings": {"斗罗大陆H5-1": ["方案1", "神界中枢刷怪"]}})
+
+        self.assertEqual(config.window_task_bindings["斗罗大陆H5-1"], ["方案1", "神界中枢刷怪", "flow"])
+        self.assertEqual(config.window_task_queues["斗罗大陆H5-1"][0]["task_name"], "神界中枢刷怪")
+        self.assertEqual(config.window_task_queues["斗罗大陆H5-1"][0]["task_type"], "flow")
+
+    def test_config_round_trip_preserves_window_task_queue(self):
+        config = AppConfig.from_dict(
+            {
+                "window_task_queues": {
+                    "斗罗大陆H5-1": [
+                        {"plan_name": "方案1", "task_name": "神界中枢刷怪", "task_type": "flow", "enabled": True},
+                        {"plan_name": "方案1", "task_name": "自动抢拍", "task_type": "auction", "enabled": False},
+                    ]
+                }
+            }
+        )
+
+        self.assertEqual([item["task_name"] for item in config.window_task_queues["斗罗大陆H5-1"]], ["神界中枢刷怪", "自动抢拍"])
+        self.assertFalse(config.window_task_queues["斗罗大陆H5-1"][1]["enabled"])
 
     def test_default_config_contains_first_shenjie_branch(self):
         config = default_config()

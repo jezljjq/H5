@@ -6,6 +6,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from h5bot.auction_config import AUCTION_TASK_TYPE, FLOW_TASK_TYPE, AuctionTaskConfig
 from h5bot.paths import app_root, resource_path
 
 
@@ -99,14 +100,22 @@ class TaskBranch:
     description: str = ""
     flow: list[FlowStep] = field(default_factory=list)
     enabled: bool = True
+    task_type: str = FLOW_TASK_TYPE
+    auction_config: AuctionTaskConfig | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TaskBranch":
+        task_type = str(data.get("task_type", FLOW_TASK_TYPE)) or FLOW_TASK_TYPE
+        auction_config = None
+        if task_type == AUCTION_TASK_TYPE or data.get("auction_config"):
+            auction_config = AuctionTaskConfig.from_dict(data.get("auction_config"), str(data.get("name", "")))
         return cls(
             name=str(data.get("name", "")),
             description=str(data.get("description", "")),
             flow=[FlowStep.from_dict(item) for item in data.get("flow", [])],
             enabled=bool(data.get("enabled", True)),
+            task_type=task_type,
+            auction_config=auction_config,
         )
 
 
@@ -133,6 +142,7 @@ class AppConfig:
     selected_plan: str = "方案1"
     selected_task: str = "神界中枢刷怪"
     window_task_bindings: dict[str, list[str]] = field(default_factory=dict)
+    window_task_queues: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     task_plans: list[TaskPlan] = field(default_factory=list)
     flow: list[FlowStep] = field(default_factory=list)
 
@@ -172,7 +182,11 @@ class AppConfig:
         renamed = _unique_name(new_name.strip() or old_name, names)
         for title, binding in self.window_task_bindings.items():
             if binding and binding[0] == old_name:
-                self.window_task_bindings[title] = [renamed, binding[1] if len(binding) > 1 else ""]
+                self.window_task_bindings[title] = [renamed, binding[1] if len(binding) > 1 else "", binding[2] if len(binding) > 2 else FLOW_TASK_TYPE]
+        for queue in self.window_task_queues.values():
+            for item in queue:
+                if item.get("plan_name") == old_name:
+                    item["plan_name"] = renamed
         plan.name = renamed
         if self.selected_plan == old_name:
             self.selected_plan = renamed
@@ -188,16 +202,22 @@ class AppConfig:
         self.window_task_bindings = {
             title: binding for title, binding in self.window_task_bindings.items() if not binding or binding[0] != name
         }
+        self.window_task_queues = {
+            title: [item for item in queue if item.get("plan_name") != name]
+            for title, queue in self.window_task_queues.items()
+        }
         if self.selected_plan == name:
             self.selected_plan = self.task_plans[0].name
             self.selected_task = self.task_plans[0].tasks[0].name if self.task_plans[0].tasks else ""
         return removed
 
-    def add_task(self, plan_name: str, name: str) -> TaskBranch:
+    def add_task(self, plan_name: str, name: str, task_type: str = FLOW_TASK_TYPE) -> TaskBranch:
         plan = self._find_plan(plan_name)
         if not plan:
             plan = self.add_task_plan(plan_name)
-        task = TaskBranch(name=_unique_name(name.strip() or "新任务", [item.name for item in plan.tasks]))
+        unique = _unique_name(name.strip() or "新任务", [item.name for item in plan.tasks])
+        auction_config = AuctionTaskConfig(task_name=unique) if task_type == AUCTION_TASK_TYPE else None
+        task = TaskBranch(name=unique, task_type=task_type, auction_config=auction_config)
         plan.tasks.append(task)
         self.selected_plan = plan.name
         self.selected_task = task.name
@@ -230,6 +250,10 @@ class AppConfig:
             for title, binding in self.window_task_bindings.items()
             if not binding or binding[:2] != [plan_name, task_name]
         }
+        self.window_task_queues = {
+            title: [item for item in queue if [item.get("plan_name"), item.get("task_name")] != [plan_name, task_name]]
+            for title, queue in self.window_task_queues.items()
+        }
         if self.selected_plan == plan_name and self.selected_task == task_name:
             self.selected_task = plan.tasks[0].name if plan.tasks else ""
         return removed
@@ -241,6 +265,8 @@ class AppConfig:
     def from_dict(cls, data: dict[str, Any]) -> "AppConfig":
         flow = [FlowStep.from_dict(item) for item in data.get("flow", [])]
         task_plans = [TaskPlan.from_dict(item) for item in data.get("task_plans", [])] or default_task_plans()
+        bindings = _bindings(data.get("window_task_bindings", {}))
+        queues = _queues(data.get("window_task_queues", {}), bindings)
         return cls(
             window_keyword=str(data.get("window_keyword", "斗罗大陆H5")),
             templates_dir=str(data.get("templates_dir", "assets/templates")),
@@ -249,7 +275,8 @@ class AppConfig:
             default_delay_after_click=float(data.get("default_delay_after_click", 0.5)),
             selected_plan=str(data.get("selected_plan", "方案1")),
             selected_task=str(data.get("selected_task", "神界中枢刷怪")),
-            window_task_bindings=_bindings(data.get("window_task_bindings", {})),
+            window_task_bindings=bindings,
+            window_task_queues=queues,
             task_plans=task_plans,
             flow=flow,
         )
@@ -333,8 +360,67 @@ def _bindings(value: Any) -> dict[str, list[str]]:
     result: dict[str, list[str]] = {}
     for title, binding in value.items():
         if isinstance(binding, (list, tuple)) and len(binding) >= 2:
-            result[str(title)] = [str(binding[0]), str(binding[1])]
+            task_type = str(binding[2]) if len(binding) > 2 else FLOW_TASK_TYPE
+            if task_type not in {FLOW_TASK_TYPE, AUCTION_TASK_TYPE}:
+                task_type = FLOW_TASK_TYPE
+            result[str(title)] = [str(binding[0]), str(binding[1]), task_type]
     return result
+
+
+def _queues(value: Any, legacy_bindings: dict[str, list[str]]) -> dict[str, list[dict[str, Any]]]:
+    result: dict[str, list[dict[str, Any]]] = {}
+    if isinstance(value, dict):
+        for title, queue in value.items():
+            normalized = [_queue_item(item, index + 1) for index, item in enumerate(queue if isinstance(queue, list) else [])]
+            normalized = [item for item in normalized if item]
+            if normalized:
+                result[str(title)] = normalized
+    for title, binding in legacy_bindings.items():
+        if title not in result and binding:
+            result[title] = [
+                {
+                    "plan_name": binding[0],
+                    "task_name": binding[1],
+                    "task_type": binding[2] if len(binding) > 2 else FLOW_TASK_TYPE,
+                    "enabled": True,
+                    "order": 1,
+                    "config_mode": "template_ref",
+                    "continue_on_failure": False,
+                    "continue_on_success": True,
+                    "stop_window_after_queue": True,
+                }
+            ]
+    return result
+
+
+def _queue_item(value: Any, order: int) -> dict[str, Any] | None:
+    if isinstance(value, dict):
+        plan_name = str(value.get("plan_name") or value.get("plan") or "")
+        task_name = str(value.get("task_name") or value.get("task") or value.get("name") or "")
+        task_type = str(value.get("task_type", FLOW_TASK_TYPE))
+        enabled = bool(value.get("enabled", True))
+    elif isinstance(value, (list, tuple)) and len(value) >= 2:
+        plan_name = str(value[0])
+        task_name = str(value[1])
+        task_type = str(value[2]) if len(value) > 2 else FLOW_TASK_TYPE
+        enabled = bool(value[3]) if len(value) > 3 else True
+    else:
+        return None
+    if not plan_name or not task_name:
+        return None
+    if task_type not in {FLOW_TASK_TYPE, AUCTION_TASK_TYPE}:
+        task_type = FLOW_TASK_TYPE
+    return {
+        "plan_name": plan_name,
+        "task_name": task_name,
+        "task_type": task_type,
+        "enabled": enabled,
+        "order": int(value.get("order", order)) if isinstance(value, dict) else order,
+        "config_mode": "template_ref",
+        "continue_on_failure": bool(value.get("continue_on_failure", False)) if isinstance(value, dict) else False,
+        "continue_on_success": bool(value.get("continue_on_success", True)) if isinstance(value, dict) else True,
+        "stop_window_after_queue": bool(value.get("stop_window_after_queue", True)) if isinstance(value, dict) else True,
+    }
 
 
 def _unique_name(base: str, existing: list[str]) -> str:

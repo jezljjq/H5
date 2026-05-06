@@ -6,13 +6,27 @@ from datetime import datetime
 from pathlib import Path
 
 from h5bot.automation import DependencyError, GameWindow, Win32Automation
+from h5bot.auction import AuctionRunner
+from h5bot.auction_config import AUCTION_TASK_TYPE, FLOW_TASK_TYPE, AuctionTaskConfig
 from h5bot.config import AppConfig, FlowStep, TaskBranch, TaskPlan, load_config, resolve_templates_dir, save_config
 from h5bot.flow import FlowRunner
 from h5bot.importer import export_panda_templates
 from h5bot.paths import app_root, writable_path
+from h5bot.preflight import run_window_task_preflight_checks
 from h5bot.recognition import recognize_step
 from h5bot.roi import auto_roi_from_match, format_roi, parse_roi
 from h5bot.template_probe import probe_step_templates_in_window
+from h5bot.window_tasks import (
+    WindowQueuedTask,
+    WindowTaskBinding,
+    binding_for_task,
+    create_runner_for_binding,
+    enabled_queue,
+    normalize_window_task_binding,
+    normalize_window_task_queue,
+    queue_to_config,
+    task_type_label,
+)
 
 
 try:
@@ -38,6 +52,7 @@ try:
         QMessageBox,
         QMenu,
         QPushButton,
+        QScrollArea,
         QSplitter,
         QSpinBox,
         QTableWidget,
@@ -102,7 +117,7 @@ class CropDialog(QDialog):
 class RoiSelectionDialog(QDialog):
     def __init__(self, image, cv2_module, initial_roi: list[int] | None = None, parent=None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("选择 ROI 区域")
+        self.setWindowTitle("选择识别区域")
         self.cv2 = cv2_module
         self.image = image
         self.start: QPoint | None = None
@@ -343,12 +358,15 @@ class MainWindow(QMainWindow):
         self.config = load_config(CONFIG_PATH)
         self.backend: Win32Automation | None = None
         self.windows: list[GameWindow] = []
-        self.window_task_assignments: dict[int, tuple[str, str]] = {}
+        self.window_task_assignments: dict[int, WindowTaskBinding] = {}
+        self.window_task_queues: dict[int, list[WindowQueuedTask]] = {}
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.worker: threading.Thread | None = None
         self.running_hwnds: set[int] = set()
         self.exception_hwnds: set[int] = set()
+        self.window_statuses: dict[int, str] = {}
+        self.window_current_tasks: dict[int, str] = {}
         self._loading_step_detail = False
         self._build_ui()
         self._connect()
@@ -390,7 +408,7 @@ class MainWindow(QMainWindow):
         toolbar = QHBoxLayout()
         toolbar.setSpacing(10)
         self.scan_button = QPushButton("扫描窗口")
-        self.pick_window_button = WindowPickerButton("◎")
+        self.pick_window_button = WindowPickerButton("绑定目标窗口")
         self.pick_window_button.setObjectName("crosshairButton")
         self.save_button = QPushButton("保存配置")
         self.test_button = QPushButton("测试识别")
@@ -412,7 +430,7 @@ class MainWindow(QMainWindow):
         left_panel.setMaximumWidth(270)
         self.keyword_edit = QLineEdit()
         self.keyword_edit.setPlaceholderText("窗口标题关键词，例如 斗罗大陆H5")
-        self.assign_task_button = QPushButton("批量分配当前任务")
+        self.assign_task_button = QPushButton("批量添加任务到选中窗口")
         self.remove_window_button = QPushButton("从列表移除")
         self.remove_window_button.setObjectName("dangerButton")
         self.window_list = QListWidget()
@@ -420,7 +438,7 @@ class MainWindow(QMainWindow):
         self.window_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.window_count_label = QLabel("等待扫描")
         self.window_count_label.setObjectName("mutedLabel")
-        self.current_task_label = QLabel("当前任务: 未选择")
+        self.current_task_label = QLabel("任务模板: 未选择")
         self.current_task_label.setObjectName("taskDescription")
         self.current_task_label.setWordWrap(True)
         left.addWidget(self.keyword_edit)
@@ -428,48 +446,95 @@ class MainWindow(QMainWindow):
         window_buttons_1.addWidget(self.scan_button, 1)
         window_buttons_1.addWidget(self.pick_window_button)
         left.addLayout(window_buttons_1)
-        left.addWidget(self.current_task_label)
         window_buttons_2 = QHBoxLayout()
         window_buttons_2.addWidget(self.assign_task_button)
         window_buttons_2.addWidget(self.remove_window_button)
         left.addLayout(window_buttons_2)
         left.addWidget(self.window_count_label)
+        self.window_list_header_label = QLabel("窗口标题 | 任务数 | 当前运行任务 | 状态")
+        self.window_list_header_label.setObjectName("mutedLabel")
+        left.addWidget(self.window_list_header_label)
         left.addWidget(self.window_list, 1)
+        self.selected_window_summary_label = QLabel("选中窗口：无")
+        self.selected_window_summary_label.setObjectName("taskDescription")
+        self.selected_window_summary_label.setWordWrap(True)
+        left.addWidget(self.selected_window_summary_label)
 
-        center_panel, center = self._panel("任务方案")
-        plan_row = QHBoxLayout()
-        self.plan_combo = QComboBox()
-        self.task_combo = QComboBox()
-        plan_row.addWidget(QLabel("方案"))
-        plan_row.addWidget(self.plan_combo)
-        plan_row.addWidget(QLabel("可选任务"))
-        plan_row.addWidget(self.task_combo, 1)
-        center.addLayout(plan_row)
-        plan_actions = QHBoxLayout()
-        self.add_plan_button = QPushButton("新增方案")
-        self.rename_plan_button = QPushButton("重命名方案")
-        self.delete_plan_button = QPushButton("删除方案")
+        center_panel, center = self._panel("任务模板与窗口任务队列")
+        # 内部任务选择控件（隐藏，仅用于任务追踪和模板库索引）
+        self.plan_combo = QComboBox(center_panel)
+        self.task_combo = QComboBox(center_panel)
+        self.task_type_combo = QComboBox(center_panel)
+        self.task_type_combo.addItem("普通流程任务", FLOW_TASK_TYPE)
+        self.task_type_combo.addItem("自动抢拍任务", AUCTION_TASK_TYPE)
+        for widget in [self.plan_combo, self.task_combo, self.task_type_combo]:
+            widget.setVisible(False)
+        self.add_plan_button = QPushButton("新增方案", center_panel)
+        self.rename_plan_button = QPushButton("重命名方案", center_panel)
+        self.delete_plan_button = QPushButton("删除方案", center_panel)
         self.delete_plan_button.setObjectName("dangerButton")
-        plan_actions.addWidget(self.add_plan_button)
-        plan_actions.addWidget(self.rename_plan_button)
-        plan_actions.addWidget(self.delete_plan_button)
-        center.addLayout(plan_actions)
-        task_actions = QHBoxLayout()
-        self.add_task_button = QPushButton("新增任务")
-        self.copy_task_button = QPushButton("复制任务")
-        self.delete_task_button = QPushButton("删除任务")
+        for button in [self.add_plan_button, self.rename_plan_button, self.delete_plan_button]:
+            button.setVisible(False)
+        self.add_task_button = QPushButton("新增任务", center_panel)
+        self.copy_task_button = QPushButton("复制任务", center_panel)
+        self.delete_task_button = QPushButton("删除任务", center_panel)
         self.delete_task_button.setObjectName("dangerButton")
-        task_actions.addWidget(self.add_task_button)
-        task_actions.addWidget(self.copy_task_button)
-        task_actions.addWidget(self.delete_task_button)
-        center.addLayout(task_actions)
+        for button in [self.add_task_button, self.copy_task_button, self.delete_task_button]:
+            button.setVisible(False)
+        queue_board = QHBoxLayout()
+        template_column = QVBoxLayout()
+        template_column.addWidget(QLabel("可选任务（模板库）"))
+        self.task_template_list = QListWidget()
+        self.task_template_list.setMinimumHeight(120)
+        template_column.addWidget(self.task_template_list, 1)
+        queue_middle_actions = QVBoxLayout()
+        self.add_to_window_queue_button = QPushButton("添加到当前窗口")
+        self.batch_add_to_queue_button = QPushButton("批量添加到选中窗口")
+        self.copy_current_queue_button = QPushButton("复制当前窗口队列到选中窗口")
+        self.replace_selected_queue_button = QPushButton("用任务模板覆盖选中窗口")
+        queue_middle_actions.addWidget(self.add_to_window_queue_button)
+        queue_middle_actions.addWidget(self.batch_add_to_queue_button)
+        queue_middle_actions.addWidget(self.copy_current_queue_button)
+        queue_middle_actions.addWidget(self.replace_selected_queue_button)
+        queue_middle_actions.addStretch(1)
+        queue_column = QVBoxLayout()
+        self.window_queue_label = QLabel("当前窗口任务队列: 未选择窗口")
+        self.window_queue_label.setObjectName("taskDescription")
+        queue_column.addWidget(self.window_queue_label)
+        self.window_queue_list = QListWidget()
+        self.window_queue_list.setSelectionMode(QListWidget.SingleSelection)
+        self.window_queue_list.setMinimumHeight(120)
+        queue_column.addWidget(self.window_queue_list, 1)
+        queue_actions_bottom = QHBoxLayout()
+        self.remove_queue_task_button = QPushButton("从队列移除")
+        self.move_queue_task_up_button = QPushButton("上移任务")
+        self.move_queue_task_down_button = QPushButton("下移任务")
+        self.toggle_queue_task_button = QPushButton("启用/禁用任务")
+        self.clear_queue_button = QPushButton("清空任务队列")
+        self.batch_clear_queue_button = QPushButton("批量清空选中窗口队列")
+        self.clear_queue_button.setObjectName("dangerButton")
+        self.batch_clear_queue_button.setObjectName("dangerButton")
+        for button in [
+            self.remove_queue_task_button,
+            self.move_queue_task_up_button,
+            self.move_queue_task_down_button,
+            self.toggle_queue_task_button,
+            self.clear_queue_button,
+            self.batch_clear_queue_button,
+        ]:
+            queue_actions_bottom.addWidget(button)
+        queue_column.addLayout(queue_actions_bottom)
+        queue_board.addLayout(template_column, 3)
+        queue_board.addLayout(queue_middle_actions, 2)
+        queue_board.addLayout(queue_column, 5)
+        center.addLayout(queue_board)
         self.task_description_label = QLabel()
         self.task_description_label.setObjectName("taskDescription")
         self.task_description_label.setWordWrap(True)
-        center.addWidget(self.task_description_label)
+        self.task_description_label.setVisible(False)
         self.templates_hint_label = QLabel("模板目录: assets/templates")
         self.templates_hint_label.setObjectName("mutedLabel")
-        center.addWidget(self.templates_hint_label)
+        self.templates_hint_label.setVisible(False)
 
         self.threshold_spin = QDoubleSpinBox()
         self.threshold_spin.setRange(0.1, 1.0)
@@ -480,20 +545,28 @@ class MainWindow(QMainWindow):
         self.threshold_spin.setMinimumWidth(100)
         self.retries_spin.setMinimumWidth(100)
 
+        self.flow_workspace = QWidget()
+        flow_workspace_layout = QVBoxLayout(self.flow_workspace)
+        flow_workspace_layout.setContentsMargins(0, 0, 0, 0)
+        flow_workspace_layout.setSpacing(7)
+
+        self.flow_config_title = QLabel("任务配置（普通流程任务）")
+        self.flow_config_title.setObjectName("panelTitle")
+        flow_workspace_layout.addWidget(self.flow_config_title)
         self.flow_path_label = QLabel("流程路径: 未选择")
         self.flow_path_label.setObjectName("flowPath")
         self.flow_path_label.setWordWrap(True)
-        center.addWidget(self.flow_path_label)
+        flow_workspace_layout.addWidget(self.flow_path_label)
 
         self.flow_table = QTableWidget(0, 7)
-        self.flow_table.setHorizontalHeaderLabels(["启用", "步骤", "模板组", "ROI", "找到后", "找到跳转", "找不到后/跳转"])
+        self.flow_table.setHorizontalHeaderLabels(["启用", "步骤", "模板组", "识别区域", "找到后", "找到跳转", "找不到后/跳转"])
         self.flow_table.verticalHeader().setVisible(False)
         self.flow_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.flow_table.setSelectionMode(QTableWidget.SingleSelection)
         self.flow_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.flow_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
         self.flow_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        center.addWidget(self.flow_table, 1)
+        flow_workspace_layout.addWidget(self.flow_table, 1)
         step_actions = QHBoxLayout()
         self.add_step_button = QPushButton("新增步骤")
         self.edit_templates_button = QPushButton("编辑模板组")
@@ -506,7 +579,8 @@ class MainWindow(QMainWindow):
         step_actions.addWidget(self.delete_step_button)
         step_actions.addWidget(self.move_step_up_button)
         step_actions.addWidget(self.move_step_down_button)
-        center.addLayout(step_actions)
+        flow_workspace_layout.addLayout(step_actions)
+        center.addWidget(self.flow_workspace, 1)
 
         right_column = QWidget()
         right_column_layout = QVBoxLayout(right_column)
@@ -514,6 +588,7 @@ class MainWindow(QMainWindow):
         right_column_layout.setSpacing(12)
 
         detail_panel, right = self._panel("当前步骤详情")
+        self.detail_panel = detail_panel
         detail_grid = QGridLayout()
         detail_grid.setHorizontalSpacing(10)
         detail_grid.setVerticalSpacing(8)
@@ -522,7 +597,7 @@ class MainWindow(QMainWindow):
         self.step_templates_label = QLabel("模板组: -")
         self.step_templates_label.setObjectName("mutedLabel")
         self.step_templates_label.setWordWrap(True)
-        self.step_roi_label = QLabel("ROI: 全窗口")
+        self.step_roi_label = QLabel("识别区域: 全窗口")
         self.step_roi_label.setObjectName("mutedLabel")
         self.step_roi_label.setWordWrap(True)
         self.step_delay_spin = QDoubleSpinBox()
@@ -532,9 +607,9 @@ class MainWindow(QMainWindow):
         self.capture_button = QPushButton("截图裁剪模板")
         self.capture_button.setObjectName("primaryButton")
         self.detail_edit_templates_button = QPushButton("编辑模板组")
-        self.select_roi_button = QPushButton("选择ROI区域")
-        self.auto_roi_button = QPushButton("自动生成ROI")
-        self.clear_roi_button = QPushButton("清空ROI")
+        self.select_roi_button = QPushButton("选择识别区域")
+        self.auto_roi_button = QPushButton("自动生成识别区域")
+        self.clear_roi_button = QPushButton("清空识别区域")
         self.clear_roi_button.setObjectName("dangerButton")
         detail_grid.addWidget(QLabel("点击后等待"), 0, 0)
         detail_grid.addWidget(self.step_delay_spin, 0, 1)
@@ -565,6 +640,144 @@ class MainWindow(QMainWindow):
         global_grid.setColumnStretch(1, 1)
         global_layout.addLayout(global_grid)
 
+        auction_status_panel, auction_status_layout = self._panel("自动抢拍运行状态")
+        self.auction_status_panel = auction_status_panel
+        self.auction_status_stage_label = QLabel("当前阶段: 未运行")
+        self.auction_status_stage_label.setObjectName("statusPill")
+        self.auction_status_target_label = QLabel("目标状态: 未锁定")
+        self.auction_status_target_label.setObjectName("mutedLabel")
+        self.auction_status_button_label = QLabel("按钮区域: 未锁定")
+        self.auction_status_button_label.setObjectName("mutedLabel")
+        self.auction_config_hint_label = QLabel("配置完整性: 未检查")
+        self.auction_config_hint_label.setObjectName("mutedLabel")
+        auction_status_layout.addWidget(self.auction_status_stage_label)
+        auction_status_layout.addWidget(self.auction_status_target_label)
+        auction_status_layout.addWidget(self.auction_status_button_label)
+        auction_status_layout.addWidget(self.auction_config_hint_label)
+
+        auction_panel, auction_layout = self._panel("任务配置（自动抢拍任务）")
+        self.auction_panel = auction_panel
+        self.auction_entry_templates_edit = QLineEdit()
+        self.auction_page_templates_edit = QLineEdit()
+        self.auction_target_templates_edit = QLineEdit()
+        self.auction_gray_templates_edit = QLineEdit()
+        self.auction_active_templates_edit = QLineEdit()
+        self.auction_confirm_templates_edit = QLineEdit()
+        self.auction_entry_roi_edit = QLineEdit()
+        self.auction_page_roi_edit = QLineEdit()
+        self.auction_list_roi_edit = QLineEdit()
+        self.auction_confirm_roi_edit = QLineEdit()
+        self.auction_offset_x_spin = self._int_spin(-2000, 2000, 400)
+        self.auction_offset_y_spin = self._int_spin(-2000, 2000, 0)
+        self.auction_roi_width_spin = self._int_spin(1, 2000, 120)
+        self.auction_roi_height_spin = self._int_spin(1, 2000, 50)
+        self.auction_pre_scan_spin = self._int_spin(10, 10000, 300)
+        self.auction_button_check_spin = self._int_spin(10, 10000, 50)
+        self.auction_confirm_check_spin = self._int_spin(10, 10000, 50)
+        self.auction_max_scroll_spin = self._int_spin(0, 500, 10)
+        self.auction_scroll_delta_spin = self._int_spin(-50, 50, -3)
+        self.auction_scroll_wait_spin = self._int_spin(0, 10000, 500)
+        self.auction_stop_scroll_check = QCheckBox("找到目标后停止滚动")
+        self.auction_click_active_check = QCheckBox("只在按钮可点击时点击")
+        self.auction_continue_check = QCheckBox("成功后继续扫描")
+        self.auction_stop_after_success_check = QCheckBox("成功后停止当前窗口")
+        self.auction_no_target_end_check = QCheckBox("完整扫描未找到目标后结束")
+        self.test_auction_config_button = QPushButton("测试自动抢拍配置")
+        self.start_auction_button = QPushButton("单窗口启动自动抢拍")
+        self.start_auction_button.setObjectName("primaryButton")
+        self.stop_auction_button = QPushButton("停止当前自动抢拍")
+        self.stop_auction_button.setObjectName("dangerButton")
+
+        entry_section = self._section_title("进入拍卖界面")
+        auction_layout.addWidget(entry_section)
+        for title, edit, group in [
+            ("拍卖入口图标模板组", self.auction_entry_templates_edit, "entry"),
+            ("拍卖界面确认模板组", self.auction_page_templates_edit, "page"),
+        ]:
+            auction_layout.addLayout(self._auction_template_row(title, edit, group))
+        auction_layout.addLayout(self._auction_roi_row("拍卖入口识别区域", self.auction_entry_roi_edit, "entry"))
+        auction_layout.addLayout(self._auction_roi_row("拍卖界面确认区域", self.auction_page_roi_edit, "page"))
+
+        auction_layout.addWidget(self._section_title("模板配置"))
+        for title, edit, group in [
+            ("目标物品模板组", self.auction_target_templates_edit, "target"),
+            ("灰色一口价按钮模板组", self.auction_gray_templates_edit, "gray"),
+            ("可点击一口价按钮模板组", self.auction_active_templates_edit, "active"),
+            ("确认按钮模板组", self.auction_confirm_templates_edit, "confirm"),
+        ]:
+            auction_layout.addLayout(self._auction_template_row(title, edit, group))
+
+        auction_layout.addWidget(self._section_title("识别区域配置"))
+        roi_grid = QGridLayout()
+        roi_grid.addWidget(QLabel("拍卖列表识别区域"), 0, 0)
+        roi_grid.addWidget(self.auction_list_roi_edit, 0, 1)
+        list_select = QPushButton("选择识别区域")
+        list_clear = QPushButton("清空识别区域")
+        list_select.clicked.connect(lambda: self.select_auction_roi("auction_list"))
+        list_clear.clicked.connect(lambda: self.clear_auction_roi("auction_list"))
+        roi_grid.addWidget(list_select, 0, 2)
+        roi_grid.addWidget(list_clear, 0, 3)
+        roi_grid.addWidget(QLabel("确认按钮识别区域"), 1, 0)
+        roi_grid.addWidget(self.auction_confirm_roi_edit, 1, 1)
+        confirm_select = QPushButton("选择识别区域")
+        confirm_clear = QPushButton("清空识别区域")
+        confirm_select.clicked.connect(lambda: self.select_auction_roi("confirm"))
+        confirm_clear.clicked.connect(lambda: self.clear_auction_roi("confirm"))
+        roi_grid.addWidget(confirm_select, 1, 2)
+        roi_grid.addWidget(confirm_clear, 1, 3)
+        roi_grid.setColumnStretch(1, 1)
+        auction_layout.addLayout(roi_grid)
+
+        auction_layout.addWidget(self._section_title("按钮定位参数"))
+        number_grid = QGridLayout()
+        for row, (label, widget) in enumerate(
+            [
+                ("一口价按钮横向偏移", self.auction_offset_x_spin),
+                ("一口价按钮纵向偏移", self.auction_offset_y_spin),
+                ("按钮区域宽度", self.auction_roi_width_spin),
+                ("按钮区域高度", self.auction_roi_height_spin),
+            ]
+        ):
+            number_grid.addWidget(QLabel(label), row // 2, (row % 2) * 2)
+            number_grid.addWidget(widget, row // 2, (row % 2) * 2 + 1)
+        auction_layout.addLayout(number_grid)
+
+        auction_layout.addWidget(self._section_title("扫描与运行策略"))
+        scan_grid = QGridLayout()
+        for row, (label, widget) in enumerate(
+            [
+                ("预扫描间隔", self.auction_pre_scan_spin),
+                ("按钮检测间隔", self.auction_button_check_spin),
+                ("确认检测间隔", self.auction_confirm_check_spin),
+                ("最大滚动次数", self.auction_max_scroll_spin),
+                ("滚动幅度", self.auction_scroll_delta_spin),
+                ("滚动等待", self.auction_scroll_wait_spin),
+            ]
+        ):
+            scan_grid.addWidget(QLabel(label), row // 2, (row % 2) * 2)
+            scan_grid.addWidget(widget, row // 2, (row % 2) * 2 + 1)
+        auction_layout.addLayout(scan_grid)
+
+        strategy_row_1 = QHBoxLayout()
+        strategy_row_1.addWidget(self.auction_stop_scroll_check)
+        strategy_row_1.addWidget(self.auction_click_active_check)
+        strategy_row_1.addWidget(self.auction_no_target_end_check)
+        auction_layout.addLayout(strategy_row_1)
+        strategy_row_2 = QHBoxLayout()
+        strategy_row_2.addWidget(self.auction_continue_check)
+        strategy_row_2.addWidget(self.auction_stop_after_success_check)
+        auction_layout.addLayout(strategy_row_2)
+        auction_actions = QHBoxLayout()
+        auction_actions.addWidget(self.test_auction_config_button)
+        auction_actions.addWidget(self.start_auction_button)
+        auction_actions.addWidget(self.stop_auction_button)
+        auction_layout.addLayout(auction_actions)
+        self.auction_workspace = QScrollArea()
+        self.auction_workspace.setWidgetResizable(True)
+        self.auction_workspace.setFrameShape(QFrame.NoFrame)
+        self.auction_workspace.setWidget(auction_panel)
+        center.addWidget(self.auction_workspace, 1)
+
         log_panel, log_layout = self._panel("运行日志")
         self.status_label = QLabel("未运行")
         self.status_label.setObjectName("statusPill")
@@ -578,6 +791,7 @@ class MainWindow(QMainWindow):
         log_layout.addWidget(self.log_box, 1)
         right_column_layout.addWidget(detail_panel, 1)
         right_column_layout.addWidget(global_panel)
+        right_column_layout.addWidget(auction_status_panel)
         right_column_layout.addWidget(log_panel, 2)
 
         splitter.addWidget(left_panel)
@@ -622,6 +836,42 @@ class MainWindow(QMainWindow):
         label.setMinimumHeight(28)
         return label
 
+    def _int_spin(self, minimum: int, maximum: int, value: int) -> QSpinBox:
+        spin = QSpinBox()
+        spin.setRange(minimum, maximum)
+        spin.setValue(value)
+        spin.setMinimumWidth(78)
+        return spin
+
+    def _section_title(self, text: str) -> QLabel:
+        label = QLabel(text)
+        label.setObjectName("sectionTitle")
+        return label
+
+    def _auction_template_row(self, title: str, edit: QLineEdit, group: str) -> QHBoxLayout:
+        row = QHBoxLayout()
+        row.addWidget(QLabel(title))
+        row.addWidget(edit, 1)
+        edit_button = QPushButton("编辑模板组")
+        test_button = QPushButton("测试识别")
+        edit_button.clicked.connect(lambda _checked=False, group=group: self.edit_auction_templates(group))
+        test_button.clicked.connect(lambda _checked=False, group=group: self.test_auction_template_group(group))
+        row.addWidget(edit_button)
+        row.addWidget(test_button)
+        return row
+
+    def _auction_roi_row(self, title: str, edit: QLineEdit, target: str) -> QHBoxLayout:
+        row = QHBoxLayout()
+        row.addWidget(QLabel(title))
+        row.addWidget(edit, 1)
+        select_button = QPushButton("选择识别区域")
+        clear_button = QPushButton("清空识别区域")
+        select_button.clicked.connect(lambda _checked=False, target=target: self.select_auction_roi(target))
+        clear_button.clicked.connect(lambda _checked=False, target=target: self.clear_auction_roi(target))
+        row.addWidget(select_button)
+        row.addWidget(clear_button)
+        return row
+
     def _apply_styles(self) -> None:
         self.setStyleSheet(
             """
@@ -648,6 +898,14 @@ class MainWindow(QMainWindow):
                 border-radius: 8px;
             }
             QLabel#panelTitle { font-size: 15px; font-weight: 700; color: #134e4a; }
+            QLabel#sectionTitle {
+                background: #F4FAF8;
+                border: 1px solid #C9E4DF;
+                border-radius: 6px;
+                color: #134e4a;
+                padding: 6px 8px;
+                font-weight: 700;
+            }
             QLabel#taskDescription {
                 background: #F4FAF8;
                 border: 1px solid #C9E4DF;
@@ -725,6 +983,16 @@ class MainWindow(QMainWindow):
         self.pick_window_button.window_picked.connect(self.bind_window_from_point)
         self.remove_window_button.clicked.connect(self.remove_selected_window)
         self.assign_task_button.clicked.connect(self.assign_current_task_to_window)
+        self.add_to_window_queue_button.clicked.connect(self.add_current_task_to_current_window_queue)
+        self.batch_add_to_queue_button.clicked.connect(self.assign_current_task_to_window)
+        self.copy_current_queue_button.clicked.connect(self.copy_current_window_queue_to_selected_windows)
+        self.replace_selected_queue_button.clicked.connect(self.replace_selected_window_queues_with_current_task)
+        self.remove_queue_task_button.clicked.connect(self.remove_selected_queue_task)
+        self.move_queue_task_up_button.clicked.connect(lambda: self.move_selected_queue_task(-1))
+        self.move_queue_task_down_button.clicked.connect(lambda: self.move_selected_queue_task(1))
+        self.toggle_queue_task_button.clicked.connect(self.toggle_selected_queue_task)
+        self.clear_queue_button.clicked.connect(self.clear_current_window_queue)
+        self.batch_clear_queue_button.clicked.connect(self.clear_selected_window_queues)
         self.capture_button.clicked.connect(self.capture_template)
         self.detail_edit_templates_button.clicked.connect(self.edit_selected_step_templates)
         self.select_roi_button.clicked.connect(self.select_step_roi)
@@ -748,8 +1016,12 @@ class MainWindow(QMainWindow):
         self.stop_button.clicked.connect(self.stop)
         self.clear_log_button.clicked.connect(self.log_box.clear)
         self.window_list.customContextMenuRequested.connect(self.show_window_context_menu)
+        self.window_list.itemSelectionChanged.connect(self._refresh_selected_window_queue)
+        self.task_template_list.currentRowChanged.connect(self._task_template_selected)
+        self.window_queue_list.currentRowChanged.connect(self._window_queue_task_selected)
         self.plan_combo.currentTextChanged.connect(self._plan_changed)
         self.task_combo.currentTextChanged.connect(self._task_changed)
+        self.task_type_combo.currentIndexChanged.connect(self._task_type_changed)
         self.flow_table.cellDoubleClicked.connect(self._flow_cell_double_clicked)
         self.flow_table.currentCellChanged.connect(self._flow_current_cell_changed)
         self.step_delay_spin.valueChanged.connect(self._step_detail_changed)
@@ -757,6 +1029,9 @@ class MainWindow(QMainWindow):
         self.finished_signal.connect(self._worker_finished)
         self.window_started_signal.connect(self._window_started)
         self.window_finished_signal.connect(self._window_finished)
+        self.test_auction_config_button.clicked.connect(self.test_auction_config)
+        self.start_auction_button.clicked.connect(self.start_selected_auction)
+        self.stop_auction_button.clicked.connect(self.stop)
 
     def _init_backend(self) -> None:
         try:
@@ -778,8 +1053,27 @@ class MainWindow(QMainWindow):
         self.templates_hint_label.setText(f"模板目录: {resolve_templates_dir(self.config)}")
         self.threshold_spin.setValue(self.config.default_threshold)
         self.retries_spin.setValue(self.config.default_retries)
+        self._ensure_template_library_tasks()
         self._populate_task_selectors()
         self._populate_flow(self.config.normalized_flow())
+
+    def _ensure_template_library_tasks(self) -> None:
+        if not self.config.task_plans:
+            self.config.task_plans.append(TaskPlan("任务模板库", []))
+        plan = self.config.task_plans[0]
+        existing = {task.name for task in plan.tasks}
+        default_templates = [
+            ("每日任务", FLOW_TASK_TYPE),
+            ("自动抢拍任务", AUCTION_TASK_TYPE),
+            ("世界BOSS挑战", FLOW_TASK_TYPE),
+            ("装备副本挑战", FLOW_TASK_TYPE),
+        ]
+        for name, task_type in default_templates:
+            if name in existing:
+                continue
+            auction_config = AuctionTaskConfig(task_name=name) if task_type == AUCTION_TASK_TYPE else None
+            plan.tasks.append(TaskBranch(name=name, task_type=task_type, auction_config=auction_config))
+            existing.add(name)
 
     def _populate_task_selectors(self) -> None:
         self.plan_combo.blockSignals(True)
@@ -803,7 +1097,24 @@ class MainWindow(QMainWindow):
         index = self.task_combo.findText(self.config.selected_task)
         self.task_combo.setCurrentIndex(max(index, 0))
         self.task_combo.blockSignals(False)
+        self._refresh_task_template_list()
         self._refresh_task_description()
+
+    def _refresh_task_template_list(self) -> None:
+        if not hasattr(self, "task_template_list"):
+            return
+        selected = (self.plan_combo.currentText(), self.task_combo.currentText())
+        self.task_template_list.blockSignals(True)
+        self.task_template_list.clear()
+        for plan in self.config.task_plans:
+            for task in plan.tasks:
+                label = f"{task.name} | {task_type_label(task.task_type)}"
+                item = QListWidgetItem(label)
+                item.setData(Qt.UserRole, (plan.name, task.name))
+                self.task_template_list.addItem(item)
+                if selected == (plan.name, task.name):
+                    self.task_template_list.setCurrentItem(item)
+        self.task_template_list.blockSignals(False)
 
     def _selected_plan(self) -> TaskPlan | None:
         name = self.plan_combo.currentText() or self.config.selected_plan
@@ -827,23 +1138,118 @@ class MainWindow(QMainWindow):
         plan = self._selected_plan()
         self.config.selected_task = plan.tasks[0].name if plan and plan.tasks else ""
         self._refresh_task_combo()
-        self._populate_flow(self.config.normalized_flow())
+        self._sync_workspace_to_task_type()
 
     def _task_changed(self, *_args) -> None:
         self.config.selected_plan = self.plan_combo.currentText()
         self.config.selected_task = self.task_combo.currentText()
+        self._select_task_template_item(self.config.selected_plan, self.config.selected_task)
         self._refresh_task_description()
-        self._populate_flow(self.config.normalized_flow())
+        self._sync_workspace_to_task_type()
+
+    def _task_template_selected(self, row: int) -> None:
+        if row < 0:
+            return
+        item = self.task_template_list.item(row)
+        value = item.data(Qt.UserRole) if item else None
+        if not isinstance(value, tuple) or len(value) != 2:
+            return
+        plan_name, task_name = value
+        self._select_template_task(plan_name, task_name)
+
+    def _select_task_template_item(self, plan_name: str, task_name: str) -> None:
+        if not hasattr(self, "task_template_list"):
+            return
+        self.task_template_list.blockSignals(True)
+        for row in range(self.task_template_list.count()):
+            item = self.task_template_list.item(row)
+            if item.data(Qt.UserRole) == (plan_name, task_name):
+                self.task_template_list.setCurrentRow(row)
+                break
+        self.task_template_list.blockSignals(False)
+
+    def _select_template_task(self, plan_name: str, task_name: str) -> None:
+        self.plan_combo.blockSignals(True)
+        self.task_combo.blockSignals(True)
+        plan_index = self.plan_combo.findText(plan_name)
+        if plan_index >= 0:
+            self.plan_combo.setCurrentIndex(plan_index)
+        task_index = self.task_combo.findText(task_name)
+        if task_index >= 0:
+            self.task_combo.setCurrentIndex(task_index)
+        self.plan_combo.blockSignals(False)
+        self.task_combo.blockSignals(False)
+        self.config.selected_plan = plan_name
+        self.config.selected_task = task_name
+        self._refresh_task_description()
+        self._sync_workspace_to_task_type()
+
+    def _sync_workspace_to_task_type(self) -> None:
+        task = self._selected_task()
+        is_auction = bool(task and (task.task_type or FLOW_TASK_TYPE) == AUCTION_TASK_TYPE)
+        self.flow_workspace.setVisible(not is_auction)
+        self.auction_workspace.setVisible(is_auction)
+        self.detail_panel.setVisible(not is_auction)
+        self.auction_status_panel.setVisible(is_auction)
+        if is_auction:
+            self._populate_flow([])
+            config = task.auction_config if task and task.auction_config else AuctionTaskConfig(task_name=(task.name if task else "自动抢拍"))
+            self._load_auction_config_to_ui(config)
+            missing = config.missing_required_groups()
+            self.auction_config_hint_label.setText(
+                "配置完整性: 当前配置不完整，缺少 " + "、".join(missing) if missing else "配置完整性: 已满足启动检查"
+            )
+        else:
+            self._populate_flow(self.config.normalized_flow())
 
     def _refresh_task_description(self) -> None:
         task = self._selected_task()
         if task:
             self.task_description_label.setText(task.description or "该任务暂无说明")
+            index = self.task_type_combo.findData(task.task_type or FLOW_TASK_TYPE)
+            self.task_type_combo.blockSignals(True)
+            self.task_type_combo.setCurrentIndex(max(index, 0))
+            self.task_type_combo.blockSignals(False)
+            self._load_auction_config_to_ui(task.auction_config or AuctionTaskConfig(task_name=task.name))
+            if (task.task_type or FLOW_TASK_TYPE) == AUCTION_TASK_TYPE:
+                self.task_description_label.setText("自动抢拍任务：请在中间工作区配置入口、模板、识别区域、按钮定位和运行策略")
         else:
-            self.task_description_label.setText("当前方案没有可选任务")
+            self.task_description_label.setText("当前没有可选任务")
         plan_name = self.plan_combo.currentText() or self.config.selected_plan
         task_name = self.task_combo.currentText() or self.config.selected_task
-        self.current_task_label.setText(f"当前任务: {plan_name} / {task_name}")
+        self.current_task_label.setText(f"当前任务模板: {task_name}" if task_name else "当前任务模板: 未选择")
+        self._refresh_task_type_visibility()
+
+    def _task_type_changed(self, *_args) -> None:
+        task = self._selected_task()
+        if not task:
+            return
+        task.task_type = self.task_type_combo.currentData() or FLOW_TASK_TYPE
+        if task.task_type == AUCTION_TASK_TYPE and task.auction_config is None:
+            task.auction_config = AuctionTaskConfig(task_name=task.name)
+            self._load_auction_config_to_ui(task.auction_config)
+        self._refresh_task_template_list()
+        self._refresh_task_type_visibility()
+
+    def _refresh_task_type_visibility(self) -> None:
+        is_auction = (self.task_type_combo.currentData() or FLOW_TASK_TYPE) == AUCTION_TASK_TYPE
+        self.auction_panel.setVisible(is_auction)
+        self.auction_workspace.setVisible(is_auction)
+        self.flow_workspace.setVisible(not is_auction)
+        self.detail_panel.setVisible(not is_auction)
+        self.task_description_label.setVisible(False)
+        self.templates_hint_label.setVisible(False)
+        self.auction_status_panel.setVisible(is_auction)
+        if is_auction and hasattr(self, "auction_config_hint_label"):
+            task = self._selected_task()
+            config = task.auction_config if task and task.auction_config else self._read_auction_config_from_ui(task.name if task else "自动抢拍")
+            missing = config.missing_required_groups()
+            if missing:
+                self.auction_config_hint_label.setText("配置完整性: 当前配置不完整，缺少 " + "、".join(missing))
+            else:
+                self.auction_config_hint_label.setText("配置完整性: 已满足启动检查")
+        for button in [self.add_step_button, self.edit_templates_button, self.delete_step_button, self.move_step_up_button, self.move_step_down_button]:
+            button.setVisible(not is_auction)
 
     def _populate_flow(self, flow: list[FlowStep]) -> None:
         self._loading_step_detail = True
@@ -887,11 +1293,69 @@ class MainWindow(QMainWindow):
             default_threshold=self.threshold_spin.value(),
             default_retries=self.retries_spin.value(),
             window_task_bindings=self._window_task_bindings_from_ui(),
+            window_task_queues=self._window_task_queues_from_ui(),
             selected_plan=self.plan_combo.currentText() or "方案1",
             selected_task=self.task_combo.currentText() or "神界中枢刷怪",
             task_plans=task_plans,
             flow=self.config.flow,
         )
+
+    def _read_auction_config_from_ui(self, task_name: str) -> AuctionTaskConfig:
+        return AuctionTaskConfig(
+            task_name=task_name,
+            auction_entry_templates=self._split_templates(self.auction_entry_templates_edit.text()),
+            auction_page_templates=self._split_templates(self.auction_page_templates_edit.text()),
+            target_templates=self._split_templates(self.auction_target_templates_edit.text()),
+            buy_button_gray_templates=self._split_templates(self.auction_gray_templates_edit.text()),
+            buy_button_active_templates=self._split_templates(self.auction_active_templates_edit.text()),
+            confirm_templates=self._split_templates(self.auction_confirm_templates_edit.text()),
+            auction_entry_roi=self._optional_roi(self.auction_entry_roi_edit.text()),
+            auction_page_roi=self._optional_roi(self.auction_page_roi_edit.text()),
+            auction_list_roi=self._optional_roi(self.auction_list_roi_edit.text()),
+            confirm_roi=self._optional_roi(self.auction_confirm_roi_edit.text()),
+            buy_button_offset_x=self.auction_offset_x_spin.value(),
+            buy_button_offset_y=self.auction_offset_y_spin.value(),
+            buy_button_roi_width=self.auction_roi_width_spin.value(),
+            buy_button_roi_height=self.auction_roi_height_spin.value(),
+            pre_scan_interval_ms=self.auction_pre_scan_spin.value(),
+            button_check_interval_ms=self.auction_button_check_spin.value(),
+            confirm_check_interval_ms=self.auction_confirm_check_spin.value(),
+            max_scroll_count=self.auction_max_scroll_spin.value(),
+            scroll_delta=self.auction_scroll_delta_spin.value(),
+            scroll_wait_ms=self.auction_scroll_wait_spin.value(),
+            stop_scroll_after_target_found=self.auction_stop_scroll_check.isChecked(),
+            click_only_when_button_active=self.auction_click_active_check.isChecked(),
+            success_continue_scan=self.auction_continue_check.isChecked(),
+            stop_after_success=self.auction_stop_after_success_check.isChecked(),
+            no_target_after_full_scan_end=self.auction_no_target_end_check.isChecked(),
+        )
+
+    def _load_auction_config_to_ui(self, config: AuctionTaskConfig) -> None:
+        self.auction_entry_templates_edit.setText("|".join(config.auction_entry_templates))
+        self.auction_page_templates_edit.setText("|".join(config.auction_page_templates))
+        self.auction_target_templates_edit.setText("|".join(config.target_templates))
+        self.auction_gray_templates_edit.setText("|".join(config.buy_button_gray_templates))
+        self.auction_active_templates_edit.setText("|".join(config.buy_button_active_templates))
+        self.auction_confirm_templates_edit.setText("|".join(config.confirm_templates))
+        self.auction_entry_roi_edit.setText(format_roi(config.auction_entry_roi))
+        self.auction_page_roi_edit.setText(format_roi(config.auction_page_roi))
+        self.auction_list_roi_edit.setText(format_roi(config.auction_list_roi))
+        self.auction_confirm_roi_edit.setText(format_roi(config.confirm_roi))
+        self.auction_offset_x_spin.setValue(config.buy_button_offset_x)
+        self.auction_offset_y_spin.setValue(config.buy_button_offset_y)
+        self.auction_roi_width_spin.setValue(config.buy_button_roi_width)
+        self.auction_roi_height_spin.setValue(config.buy_button_roi_height)
+        self.auction_pre_scan_spin.setValue(config.pre_scan_interval_ms)
+        self.auction_button_check_spin.setValue(config.button_check_interval_ms)
+        self.auction_confirm_check_spin.setValue(config.confirm_check_interval_ms)
+        self.auction_max_scroll_spin.setValue(config.max_scroll_count)
+        self.auction_scroll_delta_spin.setValue(config.scroll_delta)
+        self.auction_scroll_wait_spin.setValue(config.scroll_wait_ms)
+        self.auction_stop_scroll_check.setChecked(config.stop_scroll_after_target_found)
+        self.auction_click_active_check.setChecked(config.click_only_when_button_active)
+        self.auction_continue_check.setChecked(config.success_continue_scan)
+        self.auction_stop_after_success_check.setChecked(config.stop_after_success)
+        self.auction_no_target_end_check.setChecked(config.no_target_after_full_scan_end)
 
     def _read_flow_table(self) -> list[FlowStep]:
         self._sync_current_step_detail()
@@ -957,14 +1421,14 @@ class MainWindow(QMainWindow):
             if row < 0 or row >= self.flow_table.rowCount():
                 self.step_name_label.setText("未选择步骤")
                 self.step_templates_label.setText("模板组: -")
-                self.step_roi_label.setText("ROI: 全窗口")
+                self.step_roi_label.setText("识别区域: 全窗口")
                 self.step_delay_spin.setValue(self.config.default_delay_after_click)
                 return
             detail = self._step_detail_data(row)
             templates = self._cell_templates(row, 2)
             self.step_name_label.setText(self._cell(row, 1) or f"步骤 {row + 1}")
             self.step_templates_label.setText(f"模板组: {' | '.join(templates) if templates else '-'}")
-            self.step_roi_label.setText(f"ROI: {self._cell(row, 3) or '全窗口'}")
+            self.step_roi_label.setText(f"识别区域: {self._cell(row, 3) or '全窗口'}")
             self.step_delay_spin.setValue(float(detail["delay_after_click"]))
         finally:
             self._loading_step_detail = False
@@ -989,12 +1453,14 @@ class MainWindow(QMainWindow):
     def _task_plans_with_current_flow(self, flow: list[FlowStep]) -> list[TaskPlan]:
         selected_plan = self.plan_combo.currentText()
         selected_task = self.task_combo.currentText()
+        selected_type = self.task_type_combo.currentData() or FLOW_TASK_TYPE
         plans = []
         for plan in self.config.task_plans:
             tasks = []
             for task in plan.tasks:
                 if plan.name == selected_plan and task.name == selected_task:
-                    tasks.append(TaskBranch(task.name, task.description, flow, task.enabled))
+                    auction_config = self._read_auction_config_from_ui(task.name) if selected_type == AUCTION_TASK_TYPE else task.auction_config
+                    tasks.append(TaskBranch(task.name, task.description, flow if selected_type == FLOW_TASK_TYPE else task.flow, task.enabled, selected_type, auction_config))
                 else:
                     tasks.append(task)
             plans.append(TaskPlan(plan.name, tasks))
@@ -1056,7 +1522,11 @@ class MainWindow(QMainWindow):
         name, ok = QInputDialog.getText(self, "新增任务", "任务名称", text="新任务")
         if not ok:
             return
-        task = self.config.add_task(plan_name, name)
+        task_type_label, ok = QInputDialog.getItem(self, "选择任务类型", "任务类型", ["普通流程任务", "自动抢拍任务"], 0, False)
+        if not ok:
+            return
+        task_type = AUCTION_TASK_TYPE if task_type_label == "自动抢拍任务" else FLOW_TASK_TYPE
+        task = self.config.add_task(plan_name, name, task_type=task_type)
         self._populate_task_selectors()
         self._populate_flow(task.flow)
         self.log(f"已新增任务: {task.name}")
@@ -1164,6 +1634,190 @@ class MainWindow(QMainWindow):
         self.config = self.read_config_from_ui()
         self.log(f"已更新步骤模板组: {step_name or row + 1}")
 
+    def edit_auction_templates(self, group: str) -> None:
+        edit = self._auction_template_edit(group)
+        if edit is None:
+            return
+        dialog = StepTemplateDialog(self._auction_group_title(group), self._split_templates(edit.text()), self)
+        if dialog.exec_() != QDialog.Accepted:
+            return
+        edit.setText("|".join(dialog.templates()))
+        self.config = self.read_config_from_ui()
+        save_config(CONFIG_PATH, self.config)
+        self.log(f"已更新自动抢拍模板组: {self._auction_group_title(group)}")
+
+    def test_auction_template_group(self, group: str) -> None:
+        if not self.backend:
+            return
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            QMessageBox.information(self, "请选择窗口", "请先在左侧选择一个游戏窗口")
+            return
+        edit = self._auction_template_edit(group)
+        if edit is None:
+            return
+        templates = self._split_templates(edit.text())
+        if not templates:
+            QMessageBox.information(self, "没有模板", "当前模板组为空")
+            return
+        roi = self._auction_group_roi(group)
+        config = self.read_config_from_ui()
+        step = FlowStep(self._auction_group_title(group), templates=templates, roi=roi)
+        result = recognize_step(self.backend, hwnd, config, step, mode="auction-test")
+        self.log(result.log_message("测试识别", hwnd, self._window_title(hwnd), step.name, templates))
+        QMessageBox.information(self, "自动抢拍测试识别", "命中" if result.success else f"未命中: {result.error or result.message}")
+
+    def select_auction_roi(self, target: str) -> None:
+        if not self.backend:
+            return
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个窗口")
+            return
+        try:
+            image = self.backend.capture_window_foreground(hwnd)
+        except Exception:
+            QMessageBox.warning(self, "窗口截图失败", "窗口截图失败，请确认窗口未最小化")
+            return
+        edit = self._auction_roi_edit(target)
+        initial_roi = self._safe_parse_roi(edit.text())
+        dialog = RoiSelectionDialog(image, self.backend.cv2, initial_roi, self)
+        if dialog.exec_() != QDialog.Accepted:
+            return
+        roi = dialog.selected_roi()
+        if not roi:
+            return
+        edit.setText(format_roi(roi))
+        self.config = self.read_config_from_ui()
+        save_config(CONFIG_PATH, self.config)
+        self.log(f"自动抢拍识别区域已保存: {self._auction_roi_title(target)}={format_roi(roi)}")
+
+    def clear_auction_roi(self, target: str) -> None:
+        edit = self._auction_roi_edit(target)
+        edit.clear()
+        self.config = self.read_config_from_ui()
+        save_config(CONFIG_PATH, self.config)
+        self.log(f"已清空自动抢拍识别区域: {self._auction_roi_title(target)}")
+
+    def test_auction_config(self) -> None:
+        task = self._selected_task()
+        if not task:
+            QMessageBox.information(self, "没有任务", "请先选择自动抢拍任务")
+            return
+        config = self._read_auction_config_from_ui(task.name)
+        missing = config.missing_required_groups()
+        if missing:
+            QMessageBox.warning(self, "自动抢拍配置不完整", "缺少: " + "、".join(missing))
+            self.log("自动抢拍配置不完整: " + "、".join(missing))
+            return
+        self.log("自动抢拍配置检查通过")
+        QMessageBox.information(self, "自动抢拍配置", "配置结构检查通过")
+
+    def start_selected_auction(self) -> None:
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个窗口")
+            return
+        task = self._selected_task()
+        if not task or (self.task_type_combo.currentData() or FLOW_TASK_TYPE) != AUCTION_TASK_TYPE:
+            QMessageBox.information(self, "请选择自动抢拍任务", "当前任务不是自动抢拍任务")
+            return
+        binding = binding_for_task(self.plan_combo.currentText(), task)
+        self.window_task_queues[hwnd] = [WindowQueuedTask(binding.plan_name, binding.task_name, binding.task_type, True)]
+        self.window_task_assignments[hwnd] = binding
+        self._persist_window_queue(hwnd)
+        self.auction_status_stage_label.setText("当前阶段: 自动抢拍运行中")
+        self.auction_status_target_label.setText("目标状态: 等待识别")
+        self.auction_status_button_label.setText("按钮区域: 未锁定")
+        self._start_worker([hwnd])
+
+    def _run_auction_worker(self, hwnd: int) -> None:
+        plan_name = self.config.selected_plan
+        task_name = self.config.selected_task
+        task = self.config.for_task(plan_name, task_name).active_task()
+        if not task or not task.auction_config:
+            self.log_signal.emit(f"窗口 {hwnd}: 自动抢拍任务配置不存在")
+            self.finished_signal.emit()
+            return
+        try:
+            backend = Win32Automation()
+        except DependencyError as exc:
+            self.log_signal.emit(f"窗口 {hwnd}: 后端初始化失败: {exc}")
+            self.finished_signal.emit()
+            return
+        self.window_started_signal.emit(hwnd)
+        ok = False
+        try:
+            runner = AuctionRunner(
+                backend,
+                self.config.for_task(plan_name, task_name),
+                task.auction_config,
+                self.log_signal.emit,
+                should_stop=self.stop_event.is_set,
+            )
+            result = runner.run_window(hwnd, self._window_title_for_hwnd(hwnd))
+            ok = result.ok
+            self.log_signal.emit(f"窗口 {hwnd}: {result.message}")
+        finally:
+            shutdown = getattr(backend, "shutdown", None)
+            if shutdown:
+                shutdown()
+            self.window_finished_signal.emit(hwnd, ok)
+            self.finished_signal.emit()
+
+    def _auction_template_edit(self, group: str) -> QLineEdit | None:
+        return {
+            "entry": self.auction_entry_templates_edit,
+            "page": self.auction_page_templates_edit,
+            "target": self.auction_target_templates_edit,
+            "gray": self.auction_gray_templates_edit,
+            "active": self.auction_active_templates_edit,
+            "confirm": self.auction_confirm_templates_edit,
+        }.get(group)
+
+    def _auction_group_title(self, group: str) -> str:
+        return {
+            "entry": "拍卖入口图标模板组",
+            "page": "拍卖界面确认模板组",
+            "target": "目标物品模板组",
+            "gray": "灰色一口价按钮模板组",
+            "active": "可点击一口价按钮模板组",
+            "confirm": "确认按钮模板组",
+        }.get(group, "自动抢拍模板组")
+
+    def _auction_group_roi(self, group: str) -> list[int] | None:
+        if group == "entry":
+            return self._safe_parse_roi(self.auction_entry_roi_edit.text())
+        if group == "page":
+            return self._safe_parse_roi(self.auction_page_roi_edit.text())
+        if group == "confirm":
+            return self._safe_parse_roi(self.auction_confirm_roi_edit.text())
+        if group in {"target", "gray", "active"}:
+            return self._safe_parse_roi(self.auction_list_roi_edit.text())
+        return None
+
+    def _auction_roi_edit(self, target: str) -> QLineEdit:
+        return {
+            "entry": self.auction_entry_roi_edit,
+            "page": self.auction_page_roi_edit,
+            "confirm": self.auction_confirm_roi_edit,
+            "auction_list": self.auction_list_roi_edit,
+        }.get(target, self.auction_list_roi_edit)
+
+    def _auction_roi_title(self, target: str) -> str:
+        return {
+            "entry": "拍卖入口识别区域",
+            "page": "拍卖界面确认区域",
+            "confirm": "确认按钮识别区域",
+            "auction_list": "拍卖列表识别区域",
+        }.get(target, "自动抢拍识别区域")
+
+    def _safe_parse_roi(self, value: str) -> list[int] | None:
+        try:
+            return parse_roi(value)
+        except ValueError:
+            return None
+
     def select_step_roi(self) -> None:
         if not self.backend:
             return
@@ -1188,7 +1842,7 @@ class MainWindow(QMainWindow):
         if not roi:
             return
         self._set_step_roi(row, roi)
-        self.log(f"选择ROI: hwnd {hwnd}，窗口 {self._window_title(hwnd)}，步骤 {self._cell(row, 1)}，ROI {format_roi(roi)}")
+        self.log(f"选择识别区域: hwnd {hwnd}，窗口 {self._window_title(hwnd)}，步骤 {self._cell(row, 1)}，区域 {format_roi(roi)}")
 
     def auto_generate_step_roi(self) -> None:
         if not self.backend:
@@ -1203,44 +1857,33 @@ class MainWindow(QMainWindow):
             return
         templates = self._cell_templates(row, 2)
         if not templates:
-            QMessageBox.information(self, "没有模板", "当前步骤没有模板，无法自动生成 ROI")
+            QMessageBox.information(self, "没有模板", "当前步骤没有模板，无法自动生成识别区域")
             return
         try:
             image = self.backend.capture_window(hwnd)
         except Exception:
             QMessageBox.warning(self, "窗口截图失败", "窗口截图失败，请确认窗口未最小化")
             return
-        thresholds = [self.threshold_spin.value()]
-        lowered = max(0.1, thresholds[0] - 0.06)
-        if lowered not in thresholds:
-            thresholds.append(lowered)
+        self.config = self.read_config_from_ui()
         step = self._read_step_row(row)
-        original_threshold = step.threshold
-        for threshold in thresholds:
-            step.threshold = threshold
-            recognition = recognize_step(self.backend, hwnd, self.config, step, mode="roi")
-            if not recognition.success:
-                continue
-            width = recognition.width
-            height = recognition.height
-            if width <= 0 or height <= 0:
-                continue
-            left = recognition.x - width // 2
-            top = recognition.y - height // 2
-            roi = auto_roi_from_match(left, top, width, height, image.shape[1], image.shape[0])
-            step.threshold = original_threshold
+        recognition = recognize_step(self.backend, hwnd, self.config, step, mode="roi")
+        self.log(recognition.log_message("自动生成识别区域", hwnd, self._window_title(hwnd), step.name, templates))
+        if recognition.success and recognition.width > 0 and recognition.height > 0:
+            left = recognition.x - recognition.width // 2
+            top = recognition.y - recognition.height // 2
+            roi = auto_roi_from_match(left, top, recognition.width, recognition.height, image.shape[1], image.shape[0])
             self._set_step_roi(row, roi)
-            message = f"自动生成 ROI 成功:\n模板: {recognition.template_name}\nROI: {format_roi(roi)}"
-            QMessageBox.information(self, "自动生成 ROI 成功", message)
-            self.log(recognition.log_message("自动生成ROI", hwnd, self._window_title(hwnd), step.name, templates))
-            self.log(f"自动生成 ROI 成功: 模板 {recognition.template_name}, ROI {format_roi(roi)}")
+            message = f"自动生成识别区域成功:\n模板: {recognition.template_name}\n区域: {format_roi(roi)}"
+            QMessageBox.information(self, "自动生成识别区域成功", message)
+            self.log(f"自动生成识别区域成功: 模板 {recognition.template_name}, 区域 {format_roi(roi)}")
             return
-        step.threshold = original_threshold
+        reason = recognition.error or "模板未命中或无法读取模板尺寸"
         QMessageBox.information(
             self,
-            "自动生成 ROI 失败",
-            "当前步骤模板未识别成功，无法自动生成 ROI。\n请确认模板是否正确，或使用“选择ROI区域”手动框选。",
+            "自动生成识别区域失败",
+            f"当前步骤模板未识别成功，无法自动生成识别区域。\n原因: {reason}\n请确认模板是否正确，或使用“选择识别区域”手动框选。",
         )
+        self.log(f"自动生成识别区域失败: {step.name}，原因 {reason}")
 
     def clear_step_roi(self) -> None:
         row = self.flow_table.currentRow()
@@ -1248,7 +1891,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "请选择流程步骤", "请先选择一个流程步骤")
             return
         self._set_step_roi(row, None)
-        self.log("已清空当前步骤 ROI，恢复全窗口识别")
+        self.log("已清空当前步骤识别区域，恢复全窗口识别")
 
     def _current_row_roi(self, row: int) -> list[int] | None:
         try:
@@ -1262,6 +1905,7 @@ class MainWindow(QMainWindow):
         if row == self.flow_table.currentRow():
             self._load_step_detail(row)
         self.config = self.read_config_from_ui()
+        save_config(CONFIG_PATH, self.config)
 
     def _window_title(self, hwnd: int) -> str:
         window = next((candidate for candidate in self.windows if candidate.hwnd == hwnd), None)
@@ -1293,19 +1937,33 @@ class MainWindow(QMainWindow):
         return keyword.lower() in window.title.lower()
 
     def _refresh_window_list(self) -> None:
+        selected_hwnds = {int(item.data(Qt.UserRole)) for item in self.window_list.selectedItems() if item.data(Qt.UserRole) is not None}
         self.window_list.clear()
-        refreshed_assignments: dict[int, tuple[str, str]] = {}
+        refreshed_assignments: dict[int, WindowTaskBinding] = {}
+        refreshed_queues: dict[int, list[WindowQueuedTask]] = {}
         for window in self.windows:
-            binding = self.config.window_task_bindings.get(window.title)
-            if binding:
-                refreshed_assignments[window.hwnd] = (binding[0], binding[1])
-            elif window.hwnd in self.window_task_assignments and self._task_exists(*self.window_task_assignments[window.hwnd]):
+            queue = normalize_window_task_queue(
+                self.config.window_task_queues.get(window.title),
+                legacy_binding=self.config.window_task_bindings.get(window.title),
+            )
+            if queue:
+                refreshed_queues[window.hwnd] = queue
+                refreshed_assignments[window.hwnd] = queue[0].to_binding()
+            elif window.hwnd in self.window_task_queues:
+                refreshed_queues[window.hwnd] = self.window_task_queues[window.hwnd]
+                if refreshed_queues[window.hwnd]:
+                    refreshed_assignments[window.hwnd] = refreshed_queues[window.hwnd][0].to_binding()
+            elif window.hwnd in self.window_task_assignments and self._task_exists(self.window_task_assignments[window.hwnd]):
                 refreshed_assignments[window.hwnd] = self.window_task_assignments[window.hwnd]
+                refreshed_queues[window.hwnd] = [WindowQueuedTask(refreshed_assignments[window.hwnd].plan_name, refreshed_assignments[window.hwnd].task_name, refreshed_assignments[window.hwnd].task_type)]
         self.window_task_assignments = refreshed_assignments
+        self.window_task_queues = refreshed_queues
         for window in self.windows:
             item = QListWidgetItem(self._window_label(window))
             item.setData(Qt.UserRole, window.hwnd)
             self.window_list.addItem(item)
+            if window.hwnd in selected_hwnds:
+                item.setSelected(True)
         if not self.windows:
             item = QListWidgetItem("暂无窗口，请点击扫描窗口或拖动准星绑定窗口")
             item.setFlags(Qt.NoItemFlags)
@@ -1314,18 +1972,22 @@ class MainWindow(QMainWindow):
         else:
             self.window_count_label.setText(f"已列出 {len(self.windows)} 个窗口")
         self._refresh_status_bar()
+        self._refresh_selected_window_queue()
 
     def _refresh_status_bar(self) -> None:
         self.bound_count_label.setText(f"已绑定: {len(self.windows)}")
         self.running_count_label.setText(f"运行中: {len(self.running_hwnds)}")
         self.exception_count_label.setText(f"异常: {len(self.exception_hwnds)}")
 
-    def _task_exists(self, plan_name: str, task_name: str) -> bool:
+    def _task_exists(self, binding: WindowTaskBinding) -> bool:
         for plan in self.config.task_plans:
-            if plan.name != plan_name:
+            if plan.name != binding.plan_name:
                 continue
-            return any(task.name == task_name for task in plan.tasks)
+            return any(task.name == binding.task_name and (task.task_type or FLOW_TASK_TYPE) == binding.task_type for task in plan.tasks)
         return False
+
+    def _queue_task_exists(self, queue_item: WindowQueuedTask) -> bool:
+        return self._task_exists(queue_item.to_binding())
 
     def remove_selected_window(self) -> None:
         items = self.window_list.selectedItems()
@@ -1347,11 +2009,14 @@ class MainWindow(QMainWindow):
             return
         self.window_list.setCurrentItem(item)
         menu = QMenu(self)
-        assign_action = menu.addAction("批量分配当前任务")
+        assign_action = menu.addAction("批量添加当前任务")
+        clear_action = menu.addAction("批量清空任务队列")
         remove_action = menu.addAction("从列表移除")
         selected = menu.exec_(self.window_list.mapToGlobal(position))
         if selected == assign_action:
             self.assign_current_task_to_window()
+        elif selected == clear_action:
+            self.clear_selected_window_queues()
         elif selected == remove_action:
             self.remove_selected_window()
 
@@ -1361,14 +2026,184 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "请选择窗口", "请先选择一个窗口")
             return
         hwnds = {int(item.data(Qt.UserRole)) for item in items}
-        plan_task = (self.plan_combo.currentText(), self.task_combo.currentText())
+        selected_task = self._selected_task()
+        if not selected_task:
+            QMessageBox.information(self, "没有任务", "请先选择一个任务")
+            return
+        binding = binding_for_task(self.plan_combo.currentText(), selected_task)
+        queue_item = WindowQueuedTask(binding.plan_name, binding.task_name, binding.task_type, True)
         for hwnd in hwnds:
-            self.window_task_assignments[hwnd] = plan_task
+            self.window_task_queues.setdefault(hwnd, []).append(queue_item)
+            self.window_task_assignments[hwnd] = self.window_task_queues[hwnd][0].to_binding()
             window = next((candidate for candidate in self.windows if candidate.hwnd == hwnd), None)
             if window:
-                self.config.window_task_bindings[window.title] = [plan_task[0], plan_task[1]]
+                self.config.window_task_queues[window.title] = queue_to_config(self.window_task_queues[hwnd])
+                self.config.window_task_bindings[window.title] = self.window_task_queues[hwnd][0].to_binding().to_list()
         self._refresh_window_list()
-        self.log(f"已为 {len(hwnds)} 个窗口分配任务: {plan_task[0]} / {plan_task[1]}")
+        self.log(f"已为 {len(hwnds)} 个窗口添加队列任务: {binding.plan_name} / {binding.task_name} / {task_type_label(binding.task_type)}")
+
+    def add_current_task_to_current_window_queue(self) -> None:
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个窗口")
+            return
+        selected_task = self._selected_task()
+        if not selected_task:
+            QMessageBox.information(self, "没有任务", "请先选择一个任务模板")
+            return
+        binding = binding_for_task(self.plan_combo.currentText(), selected_task)
+        self._append_task_to_window_queue(hwnd, WindowQueuedTask(binding.plan_name, binding.task_name, binding.task_type, True))
+        self._refresh_window_list()
+        self.log(f"已添加到当前窗口队列: {binding.task_name} / {task_type_label(binding.task_type)}")
+
+    def replace_selected_window_queues_with_current_task(self) -> None:
+        items = self.window_list.selectedItems()
+        if not items:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个或多个窗口")
+            return
+        selected_task = self._selected_task()
+        if not selected_task:
+            QMessageBox.information(self, "没有任务", "请先选择一个任务模板")
+            return
+        binding = binding_for_task(self.plan_combo.currentText(), selected_task)
+        queue = [WindowQueuedTask(binding.plan_name, binding.task_name, binding.task_type, True)]
+        for item in items:
+            hwnd = int(item.data(Qt.UserRole))
+            self.window_task_queues[hwnd] = list(queue)
+            self.window_task_assignments[hwnd] = queue[0].to_binding()
+            self._persist_window_queue(hwnd)
+        self._refresh_window_list()
+        self.log(f"已替换 {len(items)} 个窗口的任务队列为: {binding.task_name}")
+
+    def copy_current_window_queue_to_selected_windows(self) -> None:
+        source_hwnd = self._selected_hwnd()
+        if source_hwnd is None:
+            QMessageBox.information(self, "请选择来源窗口", "请先选择一个来源窗口")
+            return
+        source_queue = list(self.window_task_queues.get(source_hwnd, []))
+        if not source_queue:
+            QMessageBox.information(self, "任务队列为空", "当前窗口没有可复制的任务队列")
+            return
+        items = self.window_list.selectedItems()
+        if not items:
+            QMessageBox.information(self, "请选择窗口", "请先选择要复制到的窗口")
+            return
+        count = 0
+        for item in items:
+            hwnd = int(item.data(Qt.UserRole))
+            if hwnd == source_hwnd:
+                continue
+            self.window_task_queues[hwnd] = list(source_queue)
+            self._update_assignment_from_queue(hwnd)
+            self._persist_window_queue(hwnd)
+            count += 1
+        self._refresh_window_list()
+        self.log(f"已复制当前窗口任务队列到 {count} 个窗口")
+
+    def clear_selected_window_queues(self) -> None:
+        items = self.window_list.selectedItems()
+        if not items:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个或多个窗口")
+            return
+        for item in items:
+            hwnd = int(item.data(Qt.UserRole))
+            self.window_task_queues[hwnd] = []
+            self.window_task_assignments.pop(hwnd, None)
+            self._persist_window_queue(hwnd)
+        self._refresh_window_list()
+        self.log(f"已清空 {len(items)} 个窗口的任务队列")
+
+    def clear_current_window_queue(self) -> None:
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个窗口")
+            return
+        self.window_task_queues[hwnd] = []
+        self.window_task_assignments.pop(hwnd, None)
+        self._persist_window_queue(hwnd)
+        self._refresh_window_list()
+        self.log(f"已清空窗口任务队列: {self._window_title_for_hwnd(hwnd) or hwnd}")
+
+    def remove_selected_queue_task(self) -> None:
+        hwnd, row = self._selected_queue_position()
+        if hwnd is None or row is None:
+            return
+        queue = self.window_task_queues.get(hwnd, [])
+        if 0 <= row < len(queue):
+            removed = queue.pop(row)
+            self._update_assignment_from_queue(hwnd)
+            self._persist_window_queue(hwnd)
+            self._refresh_window_list()
+            self.log(f"已从队列移除任务: {removed.task_name}")
+
+    def move_selected_queue_task(self, delta: int) -> None:
+        hwnd, row = self._selected_queue_position()
+        if hwnd is None or row is None:
+            return
+        queue = self.window_task_queues.get(hwnd, [])
+        target = row + delta
+        if not (0 <= row < len(queue) and 0 <= target < len(queue)):
+            return
+        queue[row], queue[target] = queue[target], queue[row]
+        self._update_assignment_from_queue(hwnd)
+        self._persist_window_queue(hwnd)
+        self._refresh_window_list()
+        self.window_queue_list.setCurrentRow(target)
+
+    def toggle_selected_queue_task(self) -> None:
+        hwnd, row = self._selected_queue_position()
+        if hwnd is None or row is None:
+            return
+        queue = self.window_task_queues.get(hwnd, [])
+        if 0 <= row < len(queue):
+            item = queue[row]
+            queue[row] = WindowQueuedTask(
+                item.plan_name,
+                item.task_name,
+                item.task_type,
+                not item.enabled,
+                item.continue_on_failure,
+                item.continue_on_success,
+                item.stop_window_after_queue,
+            )
+            self._persist_window_queue(hwnd)
+            self._refresh_window_list()
+            self.window_queue_list.setCurrentRow(row)
+
+    def _append_task_to_window_queue(self, hwnd: int, queue_item: WindowQueuedTask) -> None:
+        self.window_task_queues.setdefault(hwnd, []).append(queue_item)
+        self._update_assignment_from_queue(hwnd)
+        self._persist_window_queue(hwnd)
+
+    def _update_assignment_from_queue(self, hwnd: int) -> None:
+        queue = self.window_task_queues.get(hwnd, [])
+        if queue:
+            self.window_task_assignments[hwnd] = queue[0].to_binding()
+        else:
+            self.window_task_assignments.pop(hwnd, None)
+
+    def _persist_window_queue(self, hwnd: int) -> None:
+        window = next((candidate for candidate in self.windows if candidate.hwnd == hwnd), None)
+        if not window:
+            return
+        queue = self.window_task_queues.get(hwnd, [])
+        if queue:
+            self.config.window_task_queues[window.title] = queue_to_config(queue)
+            self.config.window_task_bindings[window.title] = queue[0].to_binding().to_list()
+        else:
+            self.config.window_task_queues[window.title] = []
+            self.config.window_task_bindings.pop(window.title, None)
+
+    def _selected_queue_position(self) -> tuple[int | None, int | None]:
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            QMessageBox.information(self, "请选择窗口", "请先选择一个窗口")
+            return None, None
+        row = self.window_queue_list.currentRow()
+        if row < 0:
+            QMessageBox.information(self, "请选择队列任务", "请先选择一个队列任务")
+            return hwnd, None
+        return hwnd, row
 
     def add_window_manually(self) -> None:
         hwnd_text, ok = QInputDialog.getText(self, "手动添加窗口", "请输入窗口 hwnd，例如 123456")
@@ -1403,9 +2238,13 @@ class MainWindow(QMainWindow):
                 break
         else:
             self.windows.append(window)
-        plan_task = (self.plan_combo.currentText(), self.task_combo.currentText())
-        self.window_task_assignments[window.hwnd] = plan_task
-        self.config.window_task_bindings[window.title] = [plan_task[0], plan_task[1]]
+        selected_task = self._selected_task()
+        if selected_task and window.hwnd not in self.window_task_queues:
+            binding = binding_for_task(self.plan_combo.currentText(), selected_task)
+            self.window_task_queues[window.hwnd] = [WindowQueuedTask(binding.plan_name, binding.task_name, binding.task_type, True)]
+            self.window_task_assignments[window.hwnd] = binding
+            self.config.window_task_queues[window.title] = queue_to_config(self.window_task_queues[window.hwnd])
+            self.config.window_task_bindings[window.title] = binding.to_list()
         self._refresh_window_list()
         self._select_window(window.hwnd)
 
@@ -1420,16 +2259,61 @@ class MainWindow(QMainWindow):
                 return
 
     def _window_label(self, window: GameWindow) -> str:
-        plan, task = self.window_task_assignments.get(window.hwnd, (self.config.selected_plan, self.config.selected_task))
-        return f"{window.hwnd} | {window.title}\n  任务: {plan} / {task}"
+        queue = self.window_task_queues.get(window.hwnd, [])
+        status = self.window_statuses.get(window.hwnd, "空闲")
+        current = self.window_current_tasks.get(window.hwnd, "无")
+        if current == "-":
+            current = "无"
+        return f"{window.title} | {len(queue)} | {current} | {status}"
 
     def _window_task_bindings_from_ui(self) -> dict[str, list[str]]:
         bindings = dict(self.config.window_task_bindings)
         for window in self.windows:
-            if window.hwnd in self.window_task_assignments:
-                plan, task = self.window_task_assignments[window.hwnd]
-                bindings[window.title] = [plan, task]
+            queue = self.window_task_queues.get(window.hwnd, [])
+            if queue:
+                bindings[window.title] = queue[0].to_binding().to_list()
         return bindings
+
+    def _window_task_queues_from_ui(self) -> dict[str, list[dict[str, object]]]:
+        queues = dict(self.config.window_task_queues)
+        for window in self.windows:
+            if window.hwnd in self.window_task_queues:
+                queues[window.title] = queue_to_config(self.window_task_queues[window.hwnd])
+        return queues
+
+    def _refresh_selected_window_queue(self) -> None:
+        if not hasattr(self, "window_queue_list"):
+            return
+        previous_row = self.window_queue_list.currentRow()
+        self.window_queue_list.clear()
+        hwnd = self._selected_hwnd()
+        if hwnd is None:
+            self.window_queue_label.setText("当前窗口任务队列: 未选择窗口")
+            self.selected_window_summary_label.setText("选中窗口：无")
+            return
+        title = self._window_title_for_hwnd(hwnd) or str(hwnd)
+        queue = self.window_task_queues.get(hwnd, [])
+        status = self.window_statuses.get(hwnd, "空闲")
+        self.window_queue_label.setText(f"当前窗口任务队列（共{len(queue)}个）: {title}")
+        self.selected_window_summary_label.setText(f"选中窗口：{title} | {status} | 任务：{len(queue)}个")
+        for index, queue_item in enumerate(queue, start=1):
+            state = "已启用" if queue_item.enabled else "已禁用"
+            label = f"{index}. {queue_item.task_name} | {task_type_label(queue_item.task_type)} | {state}"
+            item = QListWidgetItem(label)
+            item.setData(Qt.UserRole, index - 1)
+            self.window_queue_list.addItem(item)
+        if queue:
+            self.window_queue_list.setCurrentRow(min(max(previous_row, 0), len(queue) - 1))
+
+    def _window_queue_task_selected(self, row: int) -> None:
+        hwnd = self._selected_hwnd()
+        if hwnd is None or row < 0:
+            return
+        queue = self.window_task_queues.get(hwnd, [])
+        if row >= len(queue):
+            return
+        queue_item = queue[row]
+        self._select_template_task(queue_item.plan_name, queue_item.task_name)
 
     def capture_template(self, add_to_list: StepTemplateDialog | None = None) -> None:
         if not self.backend:
@@ -1488,6 +2372,8 @@ class MainWindow(QMainWindow):
             config = self.read_config_from_ui()
             self.log(f"窗口 {hwnd}: 测试识别 {step.name}")
             result = probe_step_templates_in_window(self.backend, hwnd, config, step)
+            if result.recognition:
+                self.log(result.recognition.log_message("测试识别", hwnd, self._window_title(hwnd), step.name, step.template_group()))
             self.log(f"窗口 {hwnd}: {result.message}")
         except Exception as exc:
             QMessageBox.warning(self, "测试识别失败", str(exc))
@@ -1519,19 +2405,32 @@ class MainWindow(QMainWindow):
     def _start_worker(self, hwnds: list[int]) -> None:
         if not self.backend:
             return
-        if self.worker and self.worker.is_alive():
-            QMessageBox.information(self, "正在运行", "当前任务还在运行")
-            return
         if not hwnds:
             QMessageBox.information(self, "没有窗口", "未找到可运行的游戏窗口")
             return
+        running_requested = [hwnd for hwnd in hwnds if hwnd in self.running_hwnds]
+        if running_requested:
+            title = self._window_title_for_hwnd(running_requested[0]) or str(running_requested[0])
+            QMessageBox.information(self, "窗口正在运行", "该窗口已有任务正在运行，请先停止当前任务。")
+            self.log(f"窗口 {title}: 该窗口已有任务正在运行，请先停止当前任务。")
+            return
         self.config = self.read_config_from_ui()
+        queues = {hwnd: self.window_task_queues.get(hwnd, []) for hwnd in hwnds}
+        report = run_window_task_preflight_checks(self.config, hwnds, self.windows, self.backend, queues)
+        for issue in report.issues:
+            self.log(f"运行前配置检查 {issue.severity}: {issue.message}")
+        if not report.ok:
+            QMessageBox.warning(self, "运行前配置检查失败", report.summary())
+            return
         save_config(CONFIG_PATH, self.config)
         self.stop_event.clear()
         self.pause_event.clear()
-        self.running_hwnds = set()
-        self.exception_hwnds = set()
+        for hwnd in hwnds:
+            self.exception_hwnds.discard(hwnd)
+            self.window_statuses[hwnd] = "启动中"
+            self.window_current_tasks[hwnd] = "-"
         self._refresh_status_bar()
+        self._refresh_window_list()
         self.status_label.setText(f"运行中: {len(hwnds)} 个窗口")
         self.worker = threading.Thread(target=self._run_worker, args=(hwnds,), daemon=True)
         self.worker.start()
@@ -1552,34 +2451,62 @@ class MainWindow(QMainWindow):
 
     def _run_window_worker(self, hwnd: int, start_event: threading.Event) -> None:
         if self.stop_event.is_set():
+            self.window_finished_signal.emit(hwnd, False)
             return
-        plan, task = self.window_task_assignments.get(hwnd, (self.config.selected_plan, self.config.selected_task))
+        queue = enabled_queue(self.window_task_queues.get(hwnd, []))
+        if not queue:
+            self.log_signal.emit(f"[{self._window_title_for_hwnd(hwnd) or hwnd}][任务队列] 没有启用任务")
+            self.window_finished_signal.emit(hwnd, False)
+            return
         try:
             backend = Win32Automation()
         except DependencyError as exc:
-            self.log_signal.emit(f"窗口 {hwnd}: 后端初始化失败: {exc}")
+            self.log_signal.emit(f"[{self._window_title_for_hwnd(hwnd) or hwnd}][任务队列] 后端初始化失败: {exc}")
             self.window_finished_signal.emit(hwnd, False)
             return
-        runner = FlowRunner(
-            backend,
-            self.config.for_task(plan, task),
-            self.log_signal.emit,
-            should_stop=self.stop_event.is_set,
-            should_pause=self.pause_event.is_set,
-        )
         start_event.wait()
         self.window_started_signal.emit(hwnd)
-        self.log_signal.emit(f"窗口 {hwnd}: 使用任务 {plan} / {task}")
-        ok = False
+        window_title = self._window_title_for_hwnd(hwnd)
+        ok = True
         try:
-            result = runner.run_window(hwnd)
-            ok = result.ok
-            self.log_signal.emit(f"窗口 {hwnd}: {result.message}")
+            for index, queue_item in enumerate(queue, start=1):
+                if self.stop_event.is_set():
+                    ok = False
+                    break
+                binding = queue_item.to_binding()
+                self.window_current_tasks[hwnd] = queue_item.task_name
+                self.log_signal.emit(f"[{window_title or hwnd}][{task_type_label(binding.task_type)}] 队列任务 {index}/{len(queue)}: {binding.plan_name} / {binding.task_name}")
+                try:
+                    runner, _task = create_runner_for_binding(
+                        backend,
+                        self.config,
+                        binding,
+                        self.log_signal.emit,
+                        should_stop=self.stop_event.is_set,
+                        should_pause=self.pause_event.is_set,
+                    )
+                    result = runner.run_window(hwnd, window_title)
+                except Exception as exc:
+                    result = type("QueueResult", (), {"ok": False, "message": f"创建或执行任务失败: {exc}"})()
+                self.log_signal.emit(f"[{window_title or hwnd}][{task_type_label(binding.task_type)}] {result.message}")
+                if not result.ok:
+                    ok = False
+                    if not queue_item.continue_on_failure:
+                        self.log_signal.emit(f"[{window_title or hwnd}][任务队列] 任务失败，停止该窗口后续队列")
+                        break
+                elif not queue_item.continue_on_success:
+                    self.log_signal.emit(f"[{window_title or hwnd}][任务队列] 任务完成后配置为不继续，停止该窗口队列")
+                    break
         finally:
             shutdown = getattr(backend, "shutdown", None)
             if shutdown:
                 shutdown()
+            self.window_current_tasks[hwnd] = "-"
             self.window_finished_signal.emit(hwnd, ok)
+
+    def _window_title_for_hwnd(self, hwnd: int) -> str:
+        window = next((candidate for candidate in self.windows if candidate.hwnd == hwnd), None)
+        return window.title if window else ""
 
     def toggle_pause(self) -> None:
         if self.pause_event.is_set():
@@ -1603,23 +2530,45 @@ class MainWindow(QMainWindow):
     def log(self, message: str) -> None:
         stamp = datetime.now().strftime("%H:%M:%S")
         self.log_box.append(f"[{stamp}] {message}")
+        self._refresh_auction_status_from_log(message)
+
+    def _refresh_auction_status_from_log(self, message: str) -> None:
+        if "[自动抢拍任务]" not in message or not hasattr(self, "auction_status_stage_label"):
+            return
+        stage = "-"
+        if "][S" in message:
+            stage = "S" + message.split("][S", 1)[1].split("]", 1)[0]
+        detail = message.rsplit("] ", 1)[-1] if "] " in message else message
+        self.auction_status_stage_label.setText(f"当前阶段: {stage} {detail}")
+        if "目标命中" in detail:
+            self.auction_status_target_label.setText(f"目标状态: {detail}")
+        if "已锁定按钮 ROI" in detail:
+            self.auction_status_button_label.setText(f"按钮区域: {detail.replace('已锁定按钮 ROI', '已锁定按钮区域')}")
 
     def _worker_finished(self) -> None:
         self.pause_button.setText("暂停")
         self.status_label.setText("已停止" if self.stop_event.is_set() else "运行结束")
-        self.running_hwnds.clear()
         self._refresh_status_bar()
+        self._refresh_window_list()
         self.log("运行结束")
 
     def _window_started(self, hwnd: int) -> None:
         self.running_hwnds.add(hwnd)
+        self.window_statuses[hwnd] = "运行中"
         self._refresh_status_bar()
+        self._refresh_window_list()
 
     def _window_finished(self, hwnd: int, ok: bool) -> None:
         self.running_hwnds.discard(hwnd)
         if not ok:
             self.exception_hwnds.add(hwnd)
+            self.window_statuses[hwnd] = "已停止" if self.stop_event.is_set() else "异常"
+        else:
+            self.exception_hwnds.discard(hwnd)
+            self.window_statuses[hwnd] = "已停止" if self.stop_event.is_set() else "已完成"
+        self.window_current_tasks[hwnd] = "-"
         self._refresh_status_bar()
+        self._refresh_window_list()
 
     def _selected_hwnd(self) -> int | None:
         item = self.window_list.currentItem()

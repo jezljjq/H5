@@ -41,14 +41,18 @@ class RecognitionResult:
     checked_paths: list[Path] | None = None
 
     def log_message(self, source: str, hwnd: int, window_title: str, step_name: str, templates: list[str]) -> str:
-        status = "命中" if self.success else "未命中"
+        hit = "是" if self.success else "否"
         roi_text = format_roi(self.roi) or "全窗口"
         checked = " | ".join(str(path) for path in (self.checked_paths or []))
-        detail = f"模板 {self.template_name}，坐标 ({self.x}, {self.y})，相似度 {self.score:.3f}" if self.success else (self.error or self.message or "无匹配")
+        hit_template = self.template_name if self.success else "-"
+        hit_point = f"({self.x}, {self.y})" if self.success else "-"
+        score = f"{self.score:.3f}" if self.success else "-"
+        failure = "-" if self.success else (self.error or self.message or "无匹配")
         return (
-            f"{source}: hwnd {hwnd}，窗口 {window_title or '-'}，步骤 {step_name}，"
-            f"模板组 {' | '.join(templates) or '-'}，ROI {roi_text}，阈值 {self.threshold:.2f}，"
-            f"重试 {self.retries}，后端 {self.backend or '-'}，结果 {status}，{detail}"
+            f"操作来源 {source}，hwnd {hwnd}，窗口标题 {window_title or '-'}，步骤名称 {step_name}，"
+            f"模板列表 {' | '.join(templates) or '-'}，ROI {roi_text}，阈值 {self.threshold:.2f}，"
+            f"默认重试次数 {self.retries}，使用后端 {self.backend or '-'}，是否命中 {hit}，"
+            f"命中模板 {hit_template}，命中坐标 {hit_point}，相似度 {score}，失败原因 {failure}"
             + (f"，已检查 {checked}" if checked and not self.success else "")
         )
 
@@ -63,8 +67,8 @@ def resolve_template_path(config: AppConfig, template: str) -> Path:
 def resolve_step_runtime_params(config: AppConfig, step: FlowStep) -> StepRuntimeParams:
     templates = step.template_group()
     roi = parse_roi(step.roi)
-    threshold = step.threshold if step.threshold is not None else config.default_threshold
-    retries = step.retries if step.retries is not None else config.default_retries
+    threshold = config.default_threshold
+    retries = config.default_retries
     return StepRuntimeParams(
         step_name=step.name,
         templates=templates,
