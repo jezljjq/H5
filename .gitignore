@@ -23,3 +23,4 @@ config/dm_license.json
 claude/
 ui_*preview*.png
 *_preview.png
+.claude/
