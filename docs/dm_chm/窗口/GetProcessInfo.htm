@@ -1,0 +1,147 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>无标题文档</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.style1, li.style1, div.style1
+	{mso-style-name:style1;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;
+	color:blue;
+	font-weight:bold;}
+span.style11
+	{mso-style-name:style11;
+	color:blue;
+	font-weight:bold;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN link=blue vlink=purple style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p class=style1><span style='font-size:13.5pt'>函数简介<span lang=EN-US>:</span></span></p>
+
+<p><span style='font-size:13.5pt'>根据指定的<span class=SpellE><span lang=EN-US>pid</span></span>获取进程详细信息<span
+lang=EN-US>,(</span>进程名<span lang=EN-US>,</span>进程全路径<span lang=EN-US>,CPU</span>占用率<span
+lang=EN-US>(</span>百分比<span lang=EN-US>),</span>内存占用量<span lang=EN-US>(</span>字节<span
+lang=EN-US>))</span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>函数原型<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'><br>
+<br>
+<span class=GramE>string</span> <span class=SpellE>GetProcessInfo</span>(<span
+class=SpellE>pid</span>) </span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>参数定义<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>pid</span></span><span
+lang=EN-US style='font-size:13.5pt'> </span><span style='font-size:13.5pt;
+color:maroon'>整形数</span><span lang=EN-US style='font-size:13.5pt'>: </span><span
+style='font-size:13.5pt'>进程<span class=SpellE><span lang=EN-US>pid</span></span><span
+lang=EN-US> </span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>返回值<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'><br>
+<br>
+</span><span style='font-size:13.5pt;color:gray'>字符串</span><span lang=EN-US
+style='font-size:13.5pt;color:maroon'>:</span><span lang=EN-US
+style='font-size:13.5pt'><br>
+</span><span style='font-size:13.5pt'>格式<span lang=EN-US>&quot;</span>进程名<span
+lang=EN-US>|</span>进程路径<span lang=EN-US>|<span class=SpellE>cpu</span>|</span>内存<span
+lang=EN-US>&quot;</span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>示例<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>infos</span></span><span
+lang=EN-US style='font-size:13.5pt'> = <span class=SpellE>dm.GetProcessInfo</span>(1348)&nbsp;<br>
+<span class=SpellE>infos</span> = split(<span class=SpellE>infos</span>,&quot;|&quot;)<br>
+<span class=SpellE>TracePrint</span> &quot;</span><span style='font-size:13.5pt'>进程名<span
+lang=EN-US>:&quot;&amp;<span class=SpellE>infos</span>(0)<br>
+<span class=SpellE>TracePrint</span> &quot;</span>进程路径<span lang=EN-US>:&quot;&amp;<span
+class=SpellE>infos</span>(1)<br>
+<span class=SpellE>TracePrint</span> &quot;</span>进程<span lang=EN-US>CPU</span>占用率<span
+lang=EN-US>(</span>百分比<span lang=EN-US>):&quot;&amp;<span class=SpellE>infos</span>(2)<br>
+<span class=SpellE>TracePrint</span> &quot;</span>进程内存占用量<span lang=EN-US>(</span>字节<span
+lang=EN-US>):&quot;&amp;<span class=SpellE><span class=GramE>infos</span></span><span
+class=GramE>(</span>3)</span></span></p>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>注<span lang=EN-US>: </span>有些时候有保护的时候，此函数返回内容会错误，那么此时可以尝试用<span
+lang=EN-US>memory</span><span class=GramE>保护盾来试试看</span><span lang=EN-US>.<br>
+</span>另外此接口调用会延迟<span lang=EN-US>1</span>秒<span lang=EN-US>. </span></span></p>
+
+</div>
+
+</body>
+
+</html>

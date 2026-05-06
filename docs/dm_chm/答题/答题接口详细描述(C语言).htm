@@ -1,0 +1,1503 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+
+
+<title>无标题文档</title>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="place"/>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.style1, li.style1, div.style1
+	{mso-style-name:style1;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;
+	color:blue;
+	font-weight:bold;}
+span.style11
+	{mso-style-name:style11;
+	color:blue;
+	font-weight:bold;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>答题接口和答题器之间的通讯协议<span
+lang=EN-US></span></span></p>
+
+<p><span style='font-size:13.5pt;color:red'>数据结构定义<span lang=EN-US>:</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>// </span><span
+style='font-size:13.5pt;color:red'>答题类型 对应于<span class=SpellE><span lang=EN-US>FaqRequestPacket</span></span>中的<span
+class=SpellE><span lang=EN-US>request_type</span></span><span lang=EN-US><br>
+#define REQUEST_TYPE_POS<span style='mso-spacerun:yes'>&nbsp;&nbsp;
+</span>0<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>坐标<span lang=EN-US><br>
+#define REQUEST_TYPE_ABCD<span style='mso-spacerun:yes'>&nbsp; </span>1<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>选项<span lang=EN-US><br>
+#define REQUEST_TYPE_OTHER 2<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>文本<span lang=EN-US><br>
+#define REQUEST_TYPE_DOUBLE_POS 3<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span>双坐标<span
+lang=EN-US></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>#<span class=SpellE>pragma</span>
+pack(push) //</span><span style='font-size:13.5pt;color:red'>保存对齐状态<span
+lang=EN-US><br>
+#<span class=SpellE>pragma</span> pack(4)//</span>设定为<span lang=EN-US>4</span>字节对齐<span
+lang=EN-US></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>// </span><span
+style='font-size:13.5pt;color:red'>发送包结构体<span lang=EN-US><br>
+<span class=SpellE>typedef</span> <span class=SpellE>struct</span><br>
+{<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>// </span>服务器转发用<span
+lang=EN-US>(</span>分流的时候可能会用到<span lang=EN-US>)<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>SOCKET <span
+class=SpellE>socket</span>;<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>分流上级发送的<span lang=EN-US>socket id.<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>char<span
+style='mso-spacerun:yes'>&nbsp; </span><span class=SpellE>ip</span>[32];<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>分流上级机器<span lang=EN-US>IP</span></span></p>
+
+<p style='text-indent:27.0pt'><span lang=EN-US style='font-size:13.5pt;
+color:red'>// </span><span style='font-size:13.5pt;color:red'>客户端内容<span
+lang=EN-US><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>DWORD <span
+class=SpellE>request_type</span>; // </span>答题类型<span lang=EN-US><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>DWORD <span
+class=SpellE>data_len</span>;<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span>真实数据的长度<span
+lang=EN-US><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>char<span
+style='mso-spacerun:yes'>&nbsp; </span>data[1];<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span>数据指针<span
+lang=EN-US>.<br>
+}<span class=SpellE>FaqRequestPacket</span>;</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>// </span><span
+style='font-size:13.5pt;color:red'>接收包结构体<span lang=EN-US><br>
+<span class=SpellE>typedef</span> <span class=SpellE>struct</span><br>
+{<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>// </span>服务器转发用<span
+lang=EN-US><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>SOCKET <span
+class=SpellE>socket</span>;<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>同<span class=SpellE><span lang=EN-US>FaqRequestPacket</span></span><span
+lang=EN-US><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>char<span
+style='mso-spacerun:yes'>&nbsp; </span><span class=SpellE>ip</span>[32];<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>// </span>同<span class=SpellE><span lang=EN-US>FaqRequestPacket</span></span><span
+lang=EN-US></span></span></p>
+
+<p style='text-indent:27.0pt'><span lang=EN-US style='font-size:13.5pt;
+color:red'>// </span><span style='font-size:13.5pt;color:red'>客户端内容<span
+lang=EN-US><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>char result[256];<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span>接收到的答案<span
+lang=EN-US>. </span>文本形式描述<span lang=EN-US>. <br>
+}<span class=SpellE>FaqReceivePacket</span>;</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>#<span class=SpellE>pragma</span>
+pack(pop)//</span><span style='font-size:13.5pt;color:red'>恢复对齐状态<span
+lang=EN-US></span></span></p>
+
+<p><span style='mso-ignore:vglayout;position:
+absolute;z-index:-4;margin-left:-4px;margin-top:4px;width:554px;height:583px'><img width=554 height=583 src="答题接口详细描述(C语言).files/image001.gif" alt=组织结构图 v:shapes="_x0000_s1040 _x0000_s1041 _s1042 _s1043 _s1044 _s1030 _s1030 _s1046 _s1053 _s1030 _s1053"></span><span
+style='font-size:13.5pt;color:red'>通讯过程流程描述<span lang=EN-US><br
+style='mso-special-character:line-break'>
+<br style='mso-special-character:line-break'>
+</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span style='font-size:13.5pt;color:red'>发送数据包详细格式解析<span lang=EN-US>:</span></span></p>
+
+<p><span style='font-size:13.5pt;color:red'>发送的数据包由包头<span lang=EN-US>+</span>数据体
+两部分组成<span lang=EN-US>.</span></span></p>
+
+<p><span style='font-size:13.5pt;color:red'>其中包头的长度是<span class=SpellE><span
+lang=EN-US>sizeof</span></span><span lang=EN-US>(<span class=SpellE>FaqRequestPacket</span>).
+</span></span></p>
+
+<p><span style='font-size:13.5pt;color:red'>数据体的长度是<span class=SpellE><span
+lang=EN-US>FaqRequestPacket</span></span>结构体中<span class=SpellE><span
+lang=EN-US>data_len</span></span>指定的长度<span lang=EN-US>. </span>用图形描述如下<span
+lang=EN-US>:</span></span></p>
+
+<p><span style='mso-ignore:vglayout;
+position:absolute;z-index:2;margin-left:54px;margin-top:31px;width:518px;
+height:37px'><img width=518 height=37 src="答题接口详细描述(C语言).files/image002.gif" v:shapes="_x0000_s1056"></span><span lang=EN-US style='font-size:
+13.5pt;color:red'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:13.5pt;color:blue'>整个数据包<span lang=EN-US>(</span>发送<span
+lang=EN-US>)</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p><span style='mso-ignore:vglayout;
+position:absolute;z-index:4;margin-left:315px;margin-top:41px;width:257px;
+height:46px'><img width=257 height=46 src="答题接口详细描述(C语言).files/image003.gif" v:shapes="_x0000_s1060"></span><span
+style='mso-ignore:vglayout;position:absolute;z-index:3;margin-left:51px;
+margin-top:41px;width:257px;height:46px'><img width=257 height=46 src="答题接口详细描述(C语言).files/image003.gif" v:shapes="_x0000_s1059"></span><span
+lang=EN-US style='font-size:13.5pt;color:red'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
+class=SpellE><span lang=EN-US style='font-size:13.5pt;color:blue'>FaqRequestPacket</span></span><span
+lang=EN-US style='font-size:13.5pt;color:blue'>(12</span><span
+style='font-size:13.5pt;color:blue'>字节<span lang=EN-US>)<span
+style='mso-spacerun:yes'>&nbsp; </span>|<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span></span>数据<span lang=EN-US>(</span>数据头<span
+lang=EN-US>+</span>数据体<span lang=EN-US>)</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
+style='font-size:13.5pt;color:blue'>长度<span class=SpellE><span lang=EN-US>sizeof</span></span><span
+lang=EN-US>(<span class=SpellE>FaqRequestPacket</span>)<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span>长度<span
+lang=EN-US>(<span class=SpellE>data_len</span>)</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span style='font-size:13.5pt;color:red'>其中数据部分的结构定义如下<span lang=EN-US>:</span></span></p>
+
+<p><span style='font-size:13.5pt;color:red'>数据部分包含<span lang=EN-US>2</span>部分，数据头和数据体<span
+lang=EN-US>.<br>
+</span>数据头<span lang=EN-US>12</span>个字节<span lang=EN-US>. </span>前<span
+lang=EN-US>4</span>个字节是一个头标识<span lang=EN-US>. </span>内容是<span lang=EN-US>4</span>个字符<span
+lang=EN-US> 'D' 'M' 'F' 'Q'.<br>
+</span>接下来<span lang=EN-US>4</span>个字节的内容表示当前图像有多少帧<span lang=EN-US>. </span>如果是静态图像此值为<span
+lang=EN-US>1</span>或者<span lang=EN-US>65535. (65535</span>表示是<span lang=EN-US>BMP</span>图像数据，<span
+lang=EN-US>65534</span>表示是<span lang=EN-US>TXT</span>文字数据<span lang=EN-US>(</span>文字编码是<span
+lang=EN-US>GBK))<br>
+</span>再接下来<span lang=EN-US>4</span>个字节表示每帧之间的延时是多少毫秒<span lang=EN-US>. </span>如果是静态图像此值为<span
+lang=EN-US>0</span></span></p>
+
+<p><span style='font-size:13.5pt;color:red'>数据体部分是连续顺序存放图片数据<span lang=EN-US>. </span>按照帧的顺序依次存放<span
+lang=EN-US>. </span>每个帧前的<span lang=EN-US>4</span>个字节表示当前帧有多少个字节<span
+lang=EN-US>.</span>比如<span lang=EN-US><br>
+(</span>长度<span lang=EN-US>)</span>帧数<span lang=EN-US>1(</span>长度<span
+lang=EN-US>)</span>帧数<span lang=EN-US>2</span>……<span lang=EN-US>(</span>长度<span
+lang=EN-US>)</span>帧数<span lang=EN-US>N.<span
+style='mso-spacerun:yes'>&nbsp;&nbsp; </span></span>每个帧的图像格式是<span lang=EN-US>jpeg</span>或者<span
+lang=EN-US>bmp</span>格式<span lang=EN-US>,</span>或者是<span lang=EN-US>TXT</span>文字数据<span
+lang=EN-US><br>
+<br>
+</span>综上<span lang=EN-US>,</span>发送包总的长度描述如下<span lang=EN-US>:<br>
+12</span>字节<span lang=EN-US>(<span class=SpellE>sizeof</span>(<span
+class=SpellE>FaqRequestPacket</span>)) + 12</span>字节<span lang=EN-US>(</span>数据头<span
+lang=EN-US>) + 4</span>字节<span lang=EN-US>(</span>第一帧长度<span lang=EN-US>) + (</span>第一帧数据<span
+lang=EN-US>) + 4</span>字节<span lang=EN-US>(</span>第二帧长度<span lang=EN-US>) + (</span>第二帧数据<span
+lang=EN-US>) + </span>…<span lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'><br>
+</span><span style='font-size:13.5pt;color:red'>接收包的格式很简单。就不多说了<span
+lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:red'>&nbsp;</span></p>
+
+<p><span style='font-size:13.5pt;color:red'>注意的是，以上只是接收和发送的纯数据格式<span
+lang=EN-US>. </span>真正发送时，还会在包头加上序列号，长度等校验信息<span lang=EN-US>. </span>以下是我用到的发送和接收数据的函数源码<span
+lang=EN-US>. </span>其他语言也可以参考<span lang=EN-US>.</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>// Common Return Code.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_SUCCESS<span style='mso-tab-count:
+10'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_FAIL<span style='mso-tab-count:
+10'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-1</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NET_NOT_INIT<span
+style='mso-tab-count:8'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-2</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NO_ERROR<span style='mso-tab-count:
+9'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_ACCEPT_SOCKET_ERROR<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-1</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_CLIENT_SOCKET_ERROR<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-2</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NO_SOCKET<span
+style='mso-tab-count:9'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-3</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NO_CONNECTION<span
+style='mso-tab-count:8'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-4</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_SOCKET_CLOSED<span
+style='mso-tab-count:8'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>0</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_TIMEOUT<span style='mso-tab-count:
+10'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-5</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_SOCKET_SHUT_DOWN<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-6</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_SERVER_NOT_PREPARED<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-7</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_SOCKET_NO_ORDER<span
+style='mso-tab-count:8'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-8</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_CONNECT<span style='mso-tab-count:
+10'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-9</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_DISCONNECT<span
+style='mso-tab-count:9'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-10</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NO_AVAILABLE_PEER<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-11</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NO_PEER<span style='mso-tab-count:
+10'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-12</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define RET_NO_PACKAGE<span
+style='mso-tab-count:9'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-13</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define READ_TIMEOUT<span style='mso-tab-count:
+9'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>5000</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define WRITE_TIMEOUT<span
+style='mso-tab-count:9'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>5000</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define READ_UNIT_SIZE<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>512
+// less than general MTU size.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define WRITE_UNIT_SIZE<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>512
+// less than general MTU size.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define MSG_LEN_INFO_SIZE<span
+style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>4</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define MAX_NET_TRIAL<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>30</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define CHECK_ALIVE_VALUE<span
+style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>-987654321</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>#define MAX_RECV_AGAIN<span
+style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>3</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span class=SpellE><span lang=EN-US>int</span></span><span
+lang=EN-US> <span class=SpellE>TCPRead</span>(SOCKET <span class=SpellE>Socket</span>,
+char *Buffer, DWORD <span class=SpellE>BufferSize</span>, DWORD <span
+class=SpellE>TimeoutMilli</span>, DWORD *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>BOOL
+<span class=SpellE>bError</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ReturnCode</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>char
+<span class=SpellE>LenInfo</span>[MSG_LEN_INFO_SIZE];</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>RetLen</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>char
+<span class=SpellE>ReadBuff</span>[READ_UNIT_SIZE];</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>DWORD
+<span class=SpellE>CopyingSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ResRecv</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> Timeout;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>char
+*<span class=SpellE>pReadingPoint</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ToReadSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>UnitReadSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>TimeoutOld</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>OutLen</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>LoopCount</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>RecvAgainCount</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>TimeoutOld</span> = -1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(0 &gt; Socket || 0 == <span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>OutLen</span> = <span class=SpellE>sizeof</span> (<span
+class=SpellE>TimeoutOld</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>getsockopt</span>(Socket, SOL_SOCKET,
+SO_RCVTIMEO, (char *)&amp;<span class=SpellE>TimeoutOld</span>, &amp;<span
+class=SpellE>OutLen</span>))</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>Timeout
+= <span class=SpellE>TimeoutMilli</span>; // Assigning is due to input the
+address of the Timeout. 0 = infinite.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>setsockopt</span>(Socket, SOL_SOCKET,
+SO_RCVTIMEO, (char *)&amp;Timeout, <span class=SpellE>sizeof</span> (Timeout)))</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(0 == Buffer || 0 == <span class=SpellE>BufferSize</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span class=SpellE><span lang=EN-US>RecvAgainNew</span></span><span
+lang=EN-US>:<span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>RecvAgainCount</span> = 0;</span></p>
+
+<p class=MsoNormal><span class=SpellE><span lang=EN-US>RecvAgain</span></span><span
+lang=EN-US>:</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ZeroMemory</span>(<span class=SpellE>LenInfo</span>, <span
+class=SpellE>sizeof</span> (<span class=SpellE>LenInfo</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ResRecv</span> = <span class=SpellE>recv</span>(Socket, <span
+class=SpellE>LenInfo</span>, <span class=SpellE>sizeof</span> (<span
+class=SpellE>LenInfo</span>), MSG_PEEK);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>ResRecv</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{
+</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(WSAECONNRESET == *<span class=SpellE>ErrorCode</span> || WSAECONNABORTED == *<span
+class=SpellE>ErrorCode</span> || WSAESHUTDOWN == *<span class=SpellE>ErrorCode</span>
+|| WSAENETRESET == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_SHUT_DOWN;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (WSAETIMEDOUT == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_TIMEOUT;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (0 == <span class=SpellE>ResRecv</span>) // socket closed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_CLOSED;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (<span class=SpellE>sizeof</span> (<span class=SpellE>LenInfo</span>) &gt; <span
+class=SpellE>ResRecv</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(MAX_RECV_AGAIN &lt;= <span class=SpellE>RecvAgainCount</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>RecvAgainCount</span>++;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>RecvAgain</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (<span class=SpellE>sizeof</span> (<span class=SpellE>LenInfo</span>) != <span
+class=SpellE>ResRecv</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>memcpy</span>(&amp;<span class=SpellE>RetLen</span>, <span
+class=SpellE>LenInfo</span>, <span class=SpellE>sizeof</span> (<span
+class=SpellE>LenInfo</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(CHECK_ALIVE_VALUE == <span class=SpellE>RetLen</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ResRecv</span> = <span class=SpellE>recv</span>(Socket, <span
+class=SpellE>LenInfo</span>, <span class=SpellE>sizeof</span> (<span
+class=SpellE>LenInfo</span>), 0); // <span class=SpellE>recv</span>() may
+return arbitrary value. &lt;- but it can handle the size of data as much as
+MTU.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>ResRecv</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{
+</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(WSAECONNRESET == *<span class=SpellE>ErrorCode</span> || WSAECONNABORTED == *<span
+class=SpellE>ErrorCode</span> || WSAESHUTDOWN == *<span class=SpellE>ErrorCode</span>
+|| WSAENETRESET == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_SHUT_DOWN;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (WSAETIMEDOUT == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_TIMEOUT;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:6'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (0 == <span class=SpellE>ResRecv</span>) // socket closed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_CLOSED;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>RecvAgainNew</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (0 &gt;= <span class=SpellE>RetLen</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_NO_ORDER;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = <span class=SpellE>RetLen</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>else
+// read the data.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>CopyingSize</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>LoopCount</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToReadSize</span> = <span class=SpellE>BufferSize</span> + <span
+class=SpellE>sizeof</span> (<span class=SpellE>LenInfo</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>while
+(1)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(<span class=SpellE>sizeof</span> (<span class=SpellE>ReadBuff</span>) &lt;= <span
+class=SpellE>ToReadSize</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>UnitReadSize</span> = <span class=SpellE>sizeof</span> (<span
+class=SpellE>ReadBuff</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>UnitReadSize</span> = <span class=SpellE>ToReadSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ZeroMemory</span>(<span class=SpellE>ReadBuff</span>, <span
+class=SpellE>sizeof</span> (<span class=SpellE>ReadBuff</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>pReadingPoint</span> = <span class=SpellE>ReadBuff</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ResRecv</span> = <span class=SpellE>recv</span>(Socket, <span
+class=SpellE>pReadingPoint</span>, <span class=SpellE>UnitReadSize</span>, 0);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>ResRecv</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{
+</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(WSAECONNRESET == *<span class=SpellE>ErrorCode</span> || WSAECONNABORTED == *<span
+class=SpellE>ErrorCode</span> || WSAESHUTDOWN == *<span class=SpellE>ErrorCode</span>
+|| WSAENETRESET == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_SHUT_DOWN;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (WSAETIMEDOUT == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_TIMEOUT;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (0 == <span class=SpellE>ResRecv</span>) // socket closed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_CLOSED;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(0 == <span class=SpellE>LoopCount</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>memcpy</span>(Buffer + <span class=SpellE>CopyingSize</span>, <span
+class=SpellE>ReadBuff</span> + <span class=SpellE>sizeof</span> (<span
+class=SpellE>LenInfo</span>), <span class=SpellE>ResRecv</span> - <span
+class=SpellE>sizeof</span> (<span class=SpellE>LenInfo</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>CopyingSize</span> += <span class=SpellE>ResRecv</span> - <span
+class=SpellE>sizeof</span> (<span class=SpellE>LenInfo</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>memcpy</span>(Buffer + <span class=SpellE>CopyingSize</span>, <span
+class=SpellE>ReadBuff</span>, <span class=SpellE>ResRecv</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>CopyingSize</span> += <span class=SpellE>ResRecv</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>LoopCount</span>++;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToReadSize</span> -= <span class=SpellE>ResRecv</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(0 &gt;= <span class=SpellE>ToReadSize</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>break;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = <span class=SpellE>CopyingSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span class=SpellE><span lang=EN-US>ErrHand</span></span><span
+lang=EN-US>:</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(-1 != <span class=SpellE>TimeoutOld</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Timeout
+= <span class=SpellE>TimeoutOld</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>setsockopt</span>(Socket, SOL_SOCKET,
+SO_RCVTIMEO, (char *)&amp;Timeout, <span class=SpellE>sizeof</span> (Timeout)))</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>return
+<span class=SpellE>ReturnCode</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>} // <span class=SpellE>TCPRead</span>()</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span class=SpellE><span lang=EN-US>int</span></span><span
+lang=EN-US> <span class=SpellE>TCPWrite</span>(SOCKET <span class=SpellE>Socket</span>,
+char *Buffer, DWORD <span class=SpellE>BufferSize</span>, DWORD <span
+class=SpellE>TimeoutMilli</span>, DWORD *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>BOOL
+<span class=SpellE>bError</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ReturnCode</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>DWORD
+<span class=SpellE>WritingSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ResSend</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> Timeout;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>TimeoutOld</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>OutLen</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ToSendSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>ToSendSizeUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>RemainedUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <st1:place w:st="on">Loop</st1:place>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>int</span> <span class=SpellE>SendingNumber</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>char
+*<span class=SpellE>pIndex</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>char
+<span class=SpellE>WriteBuf</span>[WRITE_UNIT_SIZE];</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>char
+*<span class=SpellE>pIndexUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>TimeoutOld</span> = -1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(0 &gt; Socket || 0 == Buffer || 0 == <span class=SpellE>BufferSize</span> || 0
+== <span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>OutLen</span> = <span class=SpellE>sizeof</span> (<span
+class=SpellE>TimeoutOld</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>getsockopt</span>(Socket, SOL_SOCKET,
+SO_SNDTIMEO, (char *)&amp;<span class=SpellE>TimeoutOld</span>, &amp;<span
+class=SpellE>OutLen</span>))</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>Timeout
+= <span class=SpellE>TimeoutMilli</span>; // Assigning is due to input the
+address of the Timeout. 0 = infinite.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>setsockopt</span>(Socket, SOL_SOCKET,
+SO_SNDTIMEO, (char *)&amp;Timeout, <span class=SpellE>sizeof</span> (Timeout)))</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>SendingNumber</span> = ((<span class=SpellE>BufferSize</span> + <span
+class=SpellE>sizeof</span> (<span class=SpellE>BufferSize</span>)) /
+WRITE_UNIT_SIZE) + ((0 != ((<span class=SpellE>BufferSize</span> + <span
+class=SpellE>sizeof</span> (<span class=SpellE>BufferSize</span>)) %
+WRITE_UNIT_SIZE)) ? 1 : 0);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>WritingSize</span> = 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>pIndex</span> = Buffer;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToSendSize</span> = <span class=SpellE>BufferSize</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>for
+(Loop = 0; Loop &lt; <span class=SpellE>SendingNumber</span>; <st1:place w:st="on">Loop++</st1:place>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(0 == <st1:place w:st="on">Loop</st1:place>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ZeroMemory</span>(<span class=SpellE>WriteBuf</span>, <span
+class=SpellE>sizeof</span> (<span class=SpellE>WriteBuf</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToSendSizeUnit</span> = ((WRITE_UNIT_SIZE - <span class=SpellE>sizeof</span>
+(<span class=SpellE>BufferSize</span>)) &gt; <span class=SpellE>ToSendSize</span>)
+? <span class=SpellE>ToSendSize</span> : WRITE_UNIT_SIZE - <span class=SpellE>sizeof</span>
+(<span class=SpellE>BufferSize</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>memcpy</span>(<span class=SpellE>WriteBuf</span>, &amp;<span
+class=SpellE>BufferSize</span>, <span class=SpellE>sizeof</span> (<span
+class=SpellE>BufferSize</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>memcpy</span>(<span class=SpellE>WriteBuf</span> + <span
+class=SpellE>sizeof</span> (<span class=SpellE>BufferSize</span>), <span
+class=SpellE>pIndex</span>, <span class=SpellE>ToSendSizeUnit</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>pIndex</span> += <span class=SpellE>ToSendSizeUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToSendSize</span> -= <span class=SpellE>ToSendSizeUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToSendSizeUnit</span> += <span class=SpellE>sizeof</span> (<span
+class=SpellE>BufferSize</span>); // compensation.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ZeroMemory</span>(<span class=SpellE>WriteBuf</span>, <span
+class=SpellE>sizeof</span> (<span class=SpellE>WriteBuf</span>));</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToSendSizeUnit</span> = (WRITE_UNIT_SIZE &gt; <span class=SpellE>ToSendSize</span>)
+? <span class=SpellE>ToSendSize</span> : WRITE_UNIT_SIZE;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>memcpy</span>(<span class=SpellE>WriteBuf</span>, <span
+class=SpellE>pIndex</span>, <span class=SpellE>ToSendSizeUnit</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>pIndex</span> += <span class=SpellE>ToSendSizeUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ToSendSize</span> -= <span class=SpellE>ToSendSizeUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>RemainedUnit</span> = <span class=SpellE>ToSendSizeUnit</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>pIndexUnit</span> = <span class=SpellE>WriteBuf</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>while
+(0 &lt; <span class=SpellE>RemainedUnit</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ResSend</span> = send(Socket, <span class=SpellE>pIndexUnit</span>,
+<span class=SpellE>RemainedUnit</span>, 0); // send() operates as all or
+nothing.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>ResSend</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{
+</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(WSAECONNRESET == *<span class=SpellE>ErrorCode</span> || WSAECONNABORTED == *<span
+class=SpellE>ErrorCode</span> || WSAESHUTDOWN == *<span class=SpellE>ErrorCode</span>
+|| WSAENETRESET == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_SHUT_DOWN;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (WSAETIMEDOUT == *<span class=SpellE>ErrorCode</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_TIMEOUT;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:5'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (0 == <span class=SpellE>ResSend</span>) // socket closed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_SOCKET_CLOSED;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (<span class=SpellE>ResSend</span> == <span class=SpellE>RemainedUnit</span>)
+// the normal case.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>WritingSize</span> += <span class=SpellE>ResSend</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>RemainedUnit</span> -= <span class=SpellE>ResSend</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (<span class=SpellE>ResSend</span> &gt; <span class=SpellE>RemainedUnit</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+if (<span class=SpellE>ResSend</span> &lt; <span class=SpellE>RemainedUnit</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>WritingSize</span> += <span class=SpellE>ResSend</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>RemainedUnit</span> -= <span class=SpellE>ResSend</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>pIndexUnit</span> += <span class=SpellE>ResSend</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>else
+// what? error.</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:4'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>goto</span> <span class=SpellE>ErrHand</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span class=SpellE><span lang=EN-US>ErrHand</span></span><span
+lang=EN-US>:</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(-1 != <span class=SpellE>TimeoutOld</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Timeout
+= <span class=SpellE>TimeoutOld</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if
+(SOCKET_ERROR == <span class=SpellE>setsockopt</span>(Socket, SOL_SOCKET,
+SO_SNDTIMEO, (char *)&amp;Timeout, <span class=SpellE>sizeof</span> (Timeout)))</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*<span
+class=SpellE>ErrorCode</span> = <span class=SpellE>WSAGetLastError</span>();</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>bError</span> = 1;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = RET_FAIL;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>if
+(1 == <span class=SpellE>bError</span>)</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>{</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>return
+<span class=SpellE>ReturnCode</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>ReturnCode</span> = <span class=SpellE>WritingSize</span> - <span
+class=SpellE>sizeof</span> (<span class=SpellE>BufferSize</span>);</span></p>
+
+<p class=MsoNormal><span lang=EN-US><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp; </span>return
+<span class=SpellE>ReturnCode</span>;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>} // <span class=SpellE>TCPWrite</span>()</span></p>
+
+<p><span
+lang=EN-US style='font-size:13.5pt;color:red'></span></p>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,474 @@
+{
+  "window_keyword": "斗罗大陆H5",
+  "templates_dir": "assets/templates",
+  "default_threshold": 0.86,
+  "default_retries": 3,
+  "default_delay_after_click": 0.5,
+  "selected_plan": "方案1",
+  "selected_task": "神界中枢刷怪",
+  "window_task_bindings": {
+    "斗罗大陆H5": [
+      "方案1",
+      "神界中枢刷怪"
+    ]
+  },
+  "task_plans": [
+    {
+      "name": "方案1",
+      "tasks": [
+        {
+          "name": "神界中枢刷怪",
+          "description": "神界大陆 -> 神界中枢 -> 加入战场 -> 刷怪界面一键挑战 -> 掉落单双倍处理",
+          "flow": [
+            {
+              "name": "误碰城池处理",
+              "template": "",
+              "templates": [
+                "误碰城池1.bmp",
+                "按钮2.bmp"
+              ],
+              "roi": [
+                119,
+                125,
+                637,
+                883
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "奖励界面检测",
+              "template": "",
+              "templates": [
+                "奖励界面按钮1.bmp",
+                "奖励界面按钮2.bmp"
+              ],
+              "roi": [
+                233,
+                261,
+                528,
+                309
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "jump",
+              "found_next": "单双倍选择",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "是否中枢界面",
+              "template": "",
+              "templates": [
+                "是否中枢界面1.bmp"
+              ],
+              "roi": [
+                624,
+                132,
+                751,
+                196
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "jump",
+              "found_next": "Boss按钮",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "神界大陆",
+              "template": "",
+              "templates": [
+                "神界大陆.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": true,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "神界中枢",
+              "template": "",
+              "templates": [
+                "中枢按钮1.bmp",
+                "中枢按钮2.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "jump",
+              "not_found_next": "神界大陆"
+            },
+            {
+              "name": "加入战场",
+              "template": "",
+              "templates": [
+                "加入战场按钮1.bmp"
+              ],
+              "roi": [
+                379,
+                783,
+                603,
+                859
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "jump",
+              "not_found_next": "神界中枢"
+            },
+            {
+              "name": "Boss按钮",
+              "template": "",
+              "templates": [
+                "Boss按钮1.bmp",
+                "按钮2.bmp"
+              ],
+              "roi": [
+                9,
+                234,
+                58,
+                624
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "无Boss检测",
+              "template": "",
+              "templates": [
+                "无boss按钮1.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "stop",
+              "found_next": "",
+              "on_not_found": "jump",
+              "not_found_next": "一键挑战"
+            },
+            {
+              "name": "一键挑战",
+              "template": "",
+              "templates": [
+                "一键挑战按钮1.bmp",
+                "一键挑战按钮2.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": 10,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "jump",
+              "not_found_next": "Boss按钮"
+            },
+            {
+              "name": "一键选择",
+              "template": "",
+              "templates": [
+                "一键选择按钮1.bmp",
+                "一键选择按钮2.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "全部挑战",
+              "template": "",
+              "templates": [
+                "全部挑战按钮1.bmp",
+                "全部挑战按钮2.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "挑战提示确认",
+              "template": "",
+              "templates": [
+                "提示按钮1.bmp",
+                "提示按钮2.bmp"
+              ],
+              "roi": null,
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "等待奖励界面",
+              "template": "",
+              "templates": [
+                "奖励界面按钮1.bmp",
+                "奖励界面按钮2.bmp"
+              ],
+              "roi": [
+                233,
+                261,
+                528,
+                309
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "jump",
+              "found_next": "单双倍选择",
+              "on_not_found": "jump",
+              "not_found_next": "Boss按钮"
+            },
+            {
+              "name": "单双倍选择",
+              "template": "",
+              "templates": [
+                "单倍选择1.bmp",
+                "2.bmp",
+                "3.bmp",
+                "4.bmp"
+              ],
+              "roi": [
+                90,
+                284,
+                652,
+                648
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "jump",
+              "found_next": "单倍按钮",
+              "on_not_found": "jump",
+              "not_found_next": "双倍按钮"
+            },
+            {
+              "name": "单倍按钮",
+              "template": "",
+              "templates": [
+                "单倍按钮1.bmp",
+                "2.bmp"
+              ],
+              "roi": [
+                87,
+                289,
+                657,
+                581
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            },
+            {
+              "name": "双倍按钮",
+              "template": "",
+              "templates": [
+                "双倍按钮1.bmp"
+              ],
+              "roi": [
+                93,
+                288,
+                665,
+                565
+              ],
+              "threshold": null,
+              "retries": null,
+              "timeout_seconds": 8.0,
+              "delay_after_click": 0.5,
+              "enabled": false,
+              "on_found": "click",
+              "found_next": "",
+              "on_not_found": "skip",
+              "not_found_next": ""
+            }
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "name": "方案2",
+      "tasks": []
+    },
+    {
+      "name": "方案3",
+      "tasks": []
+    }
+  ],
+  "flow": [
+    {
+      "name": "入口图标",
+      "template": "01_入口图标.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    },
+    {
+      "name": "刷怪场景",
+      "template": "02_刷怪场景.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    },
+    {
+      "name": "BOSS图标",
+      "template": "03_BOSS图标.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    },
+    {
+      "name": "一定挑战",
+      "template": "04_一定挑战.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    },
+    {
+      "name": "全选",
+      "template": "05_全选.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    },
+    {
+      "name": "挑战",
+      "template": "06_挑战.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    },
+    {
+      "name": "确定",
+      "template": "07_确定.png",
+      "templates": [],
+      "roi": null,
+      "threshold": null,
+      "retries": null,
+      "timeout_seconds": 8.0,
+      "delay_after_click": 0.5,
+      "enabled": true,
+      "on_found": "click",
+      "found_next": "",
+      "on_not_found": "fail",
+      "not_found_next": ""
+    }
+  ]
+}

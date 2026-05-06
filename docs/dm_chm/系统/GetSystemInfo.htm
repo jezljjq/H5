@@ -1,0 +1,264 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>无标题文档</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.style1, li.style1, div.style1
+	{mso-style-name:style1;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;
+	color:blue;
+	font-weight:bold;}
+span.style11
+	{mso-style-name:style11;
+	color:blue;
+	font-weight:bold;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p class=style1><span style='font-size:13.5pt'>函数简介<span lang=EN-US>:</span></span></p>
+
+<p><span style='font-size:13.5pt'>获取指定的系统信息<span lang=EN-US>.</span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>函数原型<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'><br>
+<br>
+string GetSystemInfo(type,method)</span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>参数定义<span lang=EN-US>:</span></span><span
+lang=EN-US></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>type </span><span
+style='font-size:13.5pt;color:gray'>字符串</span><span lang=EN-US
+style='font-size:13.5pt'>: </span><span style='font-size:13.5pt'>取值如下<span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;cpuid&quot; : </span>表示获取<span lang=EN-US>cpu</span>序列号<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;disk_volume_serial id&quot; : </span>表示获取分区序列号<span lang=EN-US>.
+id</span>表示分区序号<span lang=EN-US>. 0</span>表示<span lang=EN-US>C</span>盘<span
+lang=EN-US>.1</span>表示<span lang=EN-US>D</span>盘<span lang=EN-US>.</span>以此类推<span
+lang=EN-US>. </span>最高取到<span lang=EN-US>5. </span>也就是<span lang=EN-US>6</span>个分区<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;bios_vendor&quot; : </span>表示获取<span lang=EN-US>bios</span>厂商信息<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;bios_version&quot; : </span>表示获取<span lang=EN-US>bios</span>版本信息<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;bios_release_date&quot; : </span>表示获取<span lang=EN-US>bios</span>发布日期<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;bios_oem&quot; : </span>表示获取<span lang=EN-US>bios</span>里的<span
+lang=EN-US>oem</span>信息<span lang=EN-US>. method</span>可取<span lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;board_vendor&quot; : </span>表示获取主板制造厂商信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span style='mso-spacerun:yes'>&nbsp;</span><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;board_product&quot; : </span>表示获取主板产品信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;board_version&quot; : </span>表示获取主板版本信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;board_serial&quot; : </span>表示获取主板序列号<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;board_location&quot; : </span>表示获取主板位置信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_manufacturer&quot; : </span>表示获取系统制造商信息<span lang=EN-US>.
+method</span>可取<span lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_product&quot; : </span>表示获取系统产品信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_serial&quot; : </span>表示获取<span lang=EN-US>bios</span>序列号<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_uuid&quot; : </span>表示获取<span lang=EN-US>bios uuid. method</span>可取<span
+lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_version&quot; : </span>表示获取系统版本信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_sku&quot; : </span>表示获取系统<span lang=EN-US>sku</span>序列号<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_family&quot; : </span>表示获取系统家族信息<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0</span>和<span lang=EN-US>1<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;product_id&quot; : </span>表示获取系统产品<span lang=EN-US>id. method</span>可取<span
+lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_identifier&quot; : </span>表示获取系统标识<span lang=EN-US>. method</span>可取<span
+lang=EN-US>0<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_bios_version&quot; : </span>表示获取系统<span lang=EN-US>BIOS</span>版本号<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0. </span>多个结果用<span lang=EN-US>&quot;|&quot;</span>连接<span
+lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;system_bios_date&quot; : </span>表示获取系统<span lang=EN-US>BIOS</span>日期<span
+lang=EN-US>. method</span>可取<span lang=EN-US>0</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>method</span><span
+style='font-size:13.5pt;color:maroon'>整形数</span><span lang=EN-US
+style='font-size:13.5pt'>: </span><span style='font-size:13.5pt'>获取方法<span
+lang=EN-US>. </span>一般从<span lang=EN-US>0</span>开始取值<span lang=EN-US>.</span></span><span
+class=style11><span lang=EN-US></span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>返回值<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'></span></p>
+
+<p><span style='font-size:13.5pt;color:gray'>字符串<span lang=EN-US>:</span></span><span
+lang=EN-US style='font-size:13.5pt'><br>
+</span><span style='font-size:13.5pt'>字符串表达的系统信息<span lang=EN-US>.</span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>示例<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>// </span><span style='font-size:
+13.5pt'>获取系统所有特征信息<span lang=EN-US></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint
+dm.GetSystemInfo(&quot;cpuid&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;cpuid&quot;,1)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint
+dm.GetSystemInfo(&quot;bios_vendor&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;bios_vendor&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;bios_version&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;bios_version&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;bios_release_date&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;bios_release_date&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;bios_oem&quot;,0)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint dm.GetSystemInfo(&quot;board_vendor&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;board_vendor&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;board_product&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;board_product&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;board_version&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;board_version&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;board_serial&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;board_location&quot;,0)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint
+dm.GetSystemInfo(&quot;system_manufacturer&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_manufacturer&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;system_product&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_product&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;system_serial&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_uuid&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_version&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_version&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;system_sku&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_sku&quot;,1)<br>
+TracePrint dm.GetSystemInfo(&quot;system_family&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_family&quot;,1)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint
+dm.GetSystemInfo(&quot;product_id&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_identifier&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_bios_version&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;system_bios_date&quot;,0)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint
+dm.GetSystemInfo(&quot;disk_volume_serial 0&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;disk_volume_serial 1&quot;,0)<br>
+TracePrint dm.GetSystemInfo(&quot;disk_volume_serial 2&quot;,0)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint dm.GetDiskSerial(0)<br>
+TracePrint dm.GetDiskModel(0)<br>
+TracePrint dm.GetDiskReversion(0)</span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>TracePrint dm.GetMac()&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

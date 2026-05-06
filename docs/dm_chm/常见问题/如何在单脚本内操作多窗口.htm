@@ -1,0 +1,287 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:st1="urn:schemas-microsoft-com:office:smarttags"
+xmlns="http://www.w3.org/TR/rec-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>无标题文档</title>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="place"/>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>经常有人问我这个问题，现在特别把这个方法说一下。<span
+lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>比如有<span lang=EN-US>3</span>个窗口，需要在一个脚本内分别控制，以达到多开的目的<span
+lang=EN-US>.</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>如果用我的插件如何实现呢？ 其实很简单<span
+lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>比如有<span lang=EN-US>3</span>个窗口同时操作<span
+lang=EN-US>.</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>那么代码如下<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>三个句柄<span lang=EN-US>(</span>这里随便写的值，自己更换<span
+lang=EN-US>)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Dim hwnd_<span
+class=GramE>all(</span>3)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>hwnd_<span
+class=GramE>all(</span>0) = 11111</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>hwnd_<span
+class=GramE>all(</span>1) = 22222</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>hwnd_all(2) =
+33333</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>声明<span lang=EN-US>3</span>个对象<span lang=EN-US>(</span>有几个窗口声明几个<span
+lang=EN-US>)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Dim dm_<span
+class=GramE>all(</span>3)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>分别创建对象<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Set dm_<span
+class=GramE>all(</span>0) = createobject(&quot;dm.dmsoft&quot;)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Set dm_<span
+class=GramE>all(</span>1) = createobject(&quot;dm.dmsoft&quot;)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Set dm_<span
+class=GramE>all(</span>2) = createobject(&quot;dm.dmsoft&quot;)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>声明公共对象<span lang=EN-US>,</span>用于切换<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Set dm = nothing<br>
+<span class=GramE>hwnd</span> = 0</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>调试用<span lang=EN-US>,</span>打印下版本<span lang=EN-US>,</span>好习惯<span
+lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>TracePrint dm_<span
+class=GramE>all(</span>0).Ver()</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>分别绑定窗口<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>For i = 0 To 2</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>Call </span><span style='font-size:
+13.5pt'>切换对象<span lang=EN-US>(i)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>dm_ret = <span class=GramE>dm.BindWindow(</span>hwnd,
+&quot;dx&quot;, &quot;dx&quot;, &quot;dx&quot;, 0)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>// </span><span style='font-size:
+13.5pt'>检测返回值<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>If dm_ret = 0 Then </span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>MessageBox &quot;</span><span
+style='font-size:13.5pt'>绑定失败<span lang=EN-US>&quot;</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>EndScript</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>End If</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Next</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>分别设置路径字库等<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>For i = 0 To 2</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>Call </span><span style='font-size:
+13.5pt'>切换对象<span lang=EN-US>(i)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>dm.SetPath &quot;c:\test&quot;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>dm.SetDict 0,&quot;test.txt&quot;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Next</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>脚本主循环<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Do</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>For i = 0 To 2</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Call </span><span
+style='font-size:13.5pt'>切换对象<span lang=EN-US>(i)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Call </span><span
+class=GramE><span style='font-size:13.5pt'>打怪</span></span><span lang=EN-US
+style='font-size:13.5pt'>()</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>Next</span></p>
+
+<p class=MsoNormal><st1:place w:st="on"><span lang=EN-US style='font-size:13.5pt'>Loop</span></st1:place><span
+lang=EN-US style='font-size:13.5pt'></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Sub </span><span
+style='font-size:13.5pt'>切换对象<span lang=EN-US>(index)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>Set dm = dm_<span class=GramE>all(</span>index)<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>hwnd = hwnd_all(index)</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>// </span><span style='font-size:
+13.5pt'>如果还需要切换窗口也可以在这里操作<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>End Sub</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Sub </span><span
+class=GramE><span style='font-size:13.5pt'>打怪</span></span><span lang=EN-US
+style='font-size:13.5pt'>()</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>dm_ret = dm.FindStr(0, 0, 200, 200,
+&quot;</span><span style='font-size:13.5pt'>怪物名字<span lang=EN-US>&quot;,
+&quot;ffffff-000000&quot;, 1.0, x, y)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>If x &gt; 0 Then </span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span><span
+style='font-size:13.5pt'>开始打怪<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span><span
+style='font-size:13.5pt'>以下省略，和单开一样的写法<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>End If</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>End Sub</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>Sub <span
+class=GramE>OnScriptExit()</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>// </span><span style='font-size:
+13.5pt'>分别解绑窗口<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>For i = 0 To 2</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Call </span><span
+style='font-size:13.5pt'>切换对象<span lang=EN-US>(i)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>dm_ret = <span
+class=GramE>dm.UnBindWindow()</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-tab-count:1'>&nbsp;&nbsp; </span>Next</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>End Sub</span></p>
+
+</div>
+
+</body>
+
+</html>

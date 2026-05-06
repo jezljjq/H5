@@ -1,0 +1,250 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>Ai接口综述</title>
+
+
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:515 680460288 22 0 262145 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:1;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:variable;
+	mso-font-signature:0 0 0 0 0 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.MsoHeader, li.MsoHeader, div.MsoHeader
+	{mso-style-unhide:no;
+	mso-style-link:"页眉 Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	text-align:center;
+	mso-pagination:widow-orphan;
+	tab-stops:center 207.65pt right 415.3pt;
+	layout-grid-mode:char;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .75pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:9.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.MsoFooter, li.MsoFooter, div.MsoFooter
+	{mso-style-unhide:no;
+	mso-style-link:"页脚 Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:center 207.65pt right 415.3pt;
+	layout-grid-mode:char;
+	font-size:9.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+a:link, span.MsoHyperlink
+	{mso-style-unhide:no;
+	color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-unhide:no;
+	color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.style1, li.style1, div.style1
+	{mso-style-name:style1;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;
+	color:blue;
+	font-weight:bold;}
+span.style11
+	{mso-style-name:style11;
+	mso-style-unhide:no;
+	color:blue;
+	font-weight:bold;}
+span.Char
+	{mso-style-name:"页眉 Char";
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:页眉;
+	mso-ansi-font-size:9.0pt;
+	mso-bidi-font-size:9.0pt;
+	font-family:宋体;
+	mso-ascii-font-family:宋体;
+	mso-fareast-font-family:宋体;
+	mso-hansi-font-family:宋体;
+	mso-bidi-font-family:宋体;}
+span.Char0
+	{mso-style-name:"页脚 Char";
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:页脚;
+	mso-ansi-font-size:9.0pt;
+	mso-bidi-font-size:9.0pt;
+	font-family:宋体;
+	mso-ascii-font-family:宋体;
+	mso-fareast-font-family:宋体;
+	mso-hansi-font-family:宋体;
+	mso-bidi-font-family:宋体;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;
+	mso-ascii-font-family:"Times New Roman";
+	mso-hansi-font-family:"Times New Roman";
+	mso-font-kerning:0pt;}
+ /* Page Definitions */
+ 
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN link=blue vlink=purple style="tab-interval: 21.0pt">
+
+<div class=Section1><span style="FONT-SIZE: 13.5pt"><SPAN 
+style='FONT-SIZE: 13.5pt; FONT-FAMILY: "Microsoft YaHei"; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial'>
+<P 
+style="FONT-SIZE: 12pt; FONT-FAMILY: 宋体; MARGIN-LEFT: 0cm; MARGIN-RIGHT: 0cm"><SPAN 
+style="FONT-SIZE: 13.5pt">大漠YOLO环境搭建视频<SPAN>&nbsp;</SPAN><A 
+style="TEXT-DECORATION: underline; COLOR: blue" 
+href="https://www.bilibili.com/video/BV1Mp4y1n7HR/" 
+target=_blank>https://www.bilibili.com/video/BV1Mp4y1n7HR/</A></SPAN></P>
+<P 
+style="FONT-SIZE: 12pt; FONT-FAMILY: 宋体; MARGIN-LEFT: 0cm; MARGIN-RIGHT: 0cm"><SPAN 
+style="FONT-SIZE: 13.5pt">使用大漠YOLO必须用新版本dm.dll建议用最新版本大漠下载:<A 
+style="TEXT-DECORATION: underline; COLOR: blue" href="https://www.52hsxx.com/" 
+target=_blank>https://www.52hsxx.com/</A></SPAN></P></SPAN><SPAN 
+style='FONT-SIZE: medium; FONT-FAMILY: "Microsoft YaHei"; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FLOAT: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; ORPHANS: 2; WIDOWS: 2; DISPLAY: inline !important; LETTER-SPACING: normal; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial'></SPAN>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt">整个<SPAN lang=EN-US>Ai</SPAN>接口是通过外挂模块来实现的<SPAN 
+lang=EN-US>.<SPAN>&nbsp;&nbsp;<SPAN>&nbsp;</SPAN></SPAN>ai.module</SPAN>在工具包里AI模块里下载<SPAN 
+lang=EN-US>.</SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt">在调用<SPAN lang=EN-US>Ai</SPAN>接口之前<SPAN 
+lang=EN-US>,</SPAN>需要保证<SPAN lang=EN-US>LoadAi</SPAN>或者<SPAN 
+lang=EN-US>LoadAiMemory</SPAN>接口成功<SPAN lang=EN-US>.</SPAN></SPAN></P></span>
+
+<p><span style="FONT-SIZE: 13.5pt; COLOR: fuchsia">另外<span lang=EN-US>,</span>由于是内存加载<span
+ lang=EN-US>,</span>卸载模块会导致程序出异常<span lang=EN-US>,</span>所以只提供了加载接口<span
+ lang=EN-US>(LoadAi</span>和<span lang=EN-US>LoadAiMemory),</span>没有提供卸载接口<span
+ lang=EN-US>. </span>所以要特别注意<span lang=EN-US>,</span>千万不能在<span lang=EN-US>LoadAi</span>或者<span
+ lang=EN-US>LoadAiMemory</span>后卸载对象<span lang=EN-US>. </span>这样会导致模块没卸载<span
+ lang=EN-US>,</span>从而内存泄漏<span lang=EN-US>. </span>除非是程序结束<span lang=EN-US>. </span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">关于<span lang=EN-US>Yolo</span>部分<span
+ lang=EN-US>,</span>由于模型很占用内存空间<span lang=EN-US>,</span>并且检测接口很占用内存和<span
+ lang=EN-US>CPU,</span>所以在<span style="COLOR: blue">多线程中<span lang=EN-US>AiYoloDetectXX</span>系列接口不建议频繁调用</span><span
+ lang=EN-US>,</span>更不可以用此接口来代替找图等接口<span lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">如果只是单线程调用<span lang=EN-US>,</span>或者同一时间只有一个线程调用<span
+ lang=EN-US>AiYoloDetectXX</span>系列接口<span lang=EN-US>,</span>那么没什么影响<span
+ lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">内部实现上<span lang=EN-US>,Yolo</span>是使用了<span
+ style="COLOR: blue">全局的静态模型<span lang=EN-US>.</span></span><span lang=EN-US> </span>所有的对象是<span
+ style="COLOR: blue">共用模型</span><span lang=EN-US>. </span>所以在多线程的使用上要特别注意<span
+ lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">对于<span style="COLOR: blue">同一个序号</span>的模型<span
+ lang=EN-US>,</span>在多线程上是<span style="COLOR: blue">排队执行的</span><span lang=EN-US>.
+</span>尤其是同一个脚本程序控制很多窗口时<span lang=EN-US>,</span>那么多线程执行<span lang=EN-US>AiYoloDetect</span>系列接口时<span
+ lang=EN-US>,</span>并且使用的序号是相同的<span lang=EN-US>,</span>那么效率会大打折扣<span
+ lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">另外在脚本程序下<span lang=EN-US>,</span>识别效率会不如<span
+ lang=EN-US>Yolo</span>综合工具里的效率<span lang=EN-US>. </span>因为<span lang=EN-US
+ style="COLOR: blue">32</span><span style="COLOR: blue">位程序的优化不如<span lang=EN-US>64</span>位</span><span
+ lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">另外也不要问我为何没有<span lang=EN-US style="COLOR:
+ blue">GPU</span><span style="COLOR: blue">加速</span><span lang=EN-US>,</span>因为<span
+ lang=EN-US>cuda</span>不支持<span lang=EN-US>32</span>位程序<span lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt">具体的使用例子请查看我录制的视频<span lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style="FONT-SIZE: 13.5pt">&nbsp;</span></p>
+
+<p><span style="FONT-SIZE: 13.5pt; COLOR: fuchsia">注<span lang=EN-US>:<br>
+</span>如果想提高检测效率，两个途径<span lang=EN-US><br>
+1. </span>使用更小更快的预训练模型<span lang=EN-US>. </span>比如<span lang=EN-US>yolov5n<br>
+2. </span>运行的机器<span lang=EN-US>CPU</span>核心数越多<span lang=EN-US>,</span>效率越高<span
+ lang=EN-US>. </span>因为检测函数内部是多线程执行的<span lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt; COLOR: fuchsia">如果想提高检测精度<span lang=EN-US>,</span>两个途径<span
+ lang=EN-US><br>
+1. </span>使用更大但是更慢的预训练模型<span lang=EN-US>. </span>比如<span lang=EN-US>yolov5x<br>
+2. </span>对于每个类尽可能多的提供训练图片<span lang=EN-US>. </span>尽可能多的提供各种复杂背景下的训练图片<span
+ lang=EN-US>. </span>尽可能对每个类在各种复杂背景下都提供训练图片<span lang=EN-US>. </span>训练的轮次可以稍微多一些<span
+ lang=EN-US>.</span></span></p>
+
+<p><span style="FONT-SIZE: 13.5pt; COLOR: fuchsia">如果发现自己训练后的模型<span lang=EN-US>,</span>会越训练越差<span
+ lang=EN-US>,</span>说明是你训练的过头了<span lang=EN-US>(</span>过拟合<span lang=EN-US>),</span>减少轮次<span
+ lang=EN-US>,</span>重新训练<span lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style="FONT-SIZE: 13.5pt">&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

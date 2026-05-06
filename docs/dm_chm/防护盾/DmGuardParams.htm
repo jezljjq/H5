@@ -1,0 +1,486 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>无标题文档</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p.style1, li.style1, div.style1
+	{mso-style-name:style1;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;
+	color:blue;
+	font-weight:bold;}
+span.style11
+	{mso-style-name:style11;
+	color:blue;
+	font-weight:bold;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p class=style1><span style='font-size:13.5pt'>函数简介<span lang=EN-US>:</span></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>DmGuard</span></span><span
+style='font-size:13.5pt'>的加强接口<span lang=EN-US>,</span>用于获取一些额外信息<span
+lang=EN-US>. </span>具体看下面参数介绍<span lang=EN-US></span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>函数原型<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'><br>
+<br>
+string <span class=SpellE>DmGuardParams</span>(<span class=SpellE>cmd,subcmd,param</span>)
+</span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>参数定义<span lang=EN-US>:</span></span><span
+lang=EN-US></span></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>cmd</span></span><span
+lang=EN-US style='font-size:13.5pt'> </span><span style='font-size:13.5pt;
+color:gray'>字符串<span lang=EN-US>:</span></span><span lang=EN-US
+style='font-size:13.5pt'> </span><span style='font-size:13.5pt'>盾类型<span
+lang=EN-US>. </span>这里取值为<span lang=EN-US>&quot;<span class=SpellE>gr</span>&quot;</span>或者<span
+lang=EN-US>&quot;<span class=SpellE>th</span>&quot;(</span>以后可能会有扩充<span
+lang=EN-US>). </span><span style='color:fuchsia'>这里要注意的是<span lang=EN-US>,</span>如果要获取指定的盾类型信息<span
+lang=EN-US>,</span>必须先成功用<span class=SpellE><span lang=EN-US>DmGuard</span></span>开启此盾<span
+lang=EN-US>.</span>比如这里的<span lang=EN-US>&quot;<span class=SpellE>gr</span>&quot;</span>必须<span
+class=SpellE><span lang=EN-US>dm.DmGuard</span></span><span lang=EN-US>
+1,&quot;gr&quot;</span>开启成功才可以</span></span><span lang=EN-US style='color:fuchsia'></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>subcmd</span></span><span
+lang=EN-US style='font-size:13.5pt'> </span><span style='font-size:13.5pt;
+color:gray'>字符串<span lang=EN-US>:</span></span><span lang=EN-US
+style='font-size:13.5pt'> </span><span style='font-size:13.5pt'>针对具体的盾类型，需要获取的具体信息<span
+lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:13.5pt'>如果<span class=SpellE><span
+lang=EN-US>cmd</span></span>为<span lang=EN-US>&quot;<span class=SpellE>gr</span>&quot;</span>时<span
+lang=EN-US>,</span>那么<span class=SpellE><span lang=EN-US>subcmd</span></span>取值如下定义<span
+lang=EN-US>:<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;<span class=SpellE>enum</span>&quot; : </span><span
+style='color:green'>枚举指定进程的所有句柄<span lang=EN-US>.</span></span><span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;get&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: </span><span
+style='color:green'>获取指定进程的指定句柄信息<span lang=EN-US>.(</span>类型<span lang=EN-US>,</span>名字<span
+lang=EN-US>,</span>权限值<span lang=EN-US>)</span></span><span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;set&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: </span><span
+style='color:green'>设置指定进程的指定句柄的权限值<span lang=EN-US>.</span></span><span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;close&quot;: </span><span style='color:green'>关闭指定进程的指定句柄<span
+lang=EN-US>.</span></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt;color:green'><span
+style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='mso-spacerun:yes'>&nbsp;</span><span
+style='mso-spacerun:yes'>&nbsp;</span></span><span style='font-size:13.5pt'>如果<span
+class=SpellE><span lang=EN-US>cmd</span></span>为<span lang=EN-US>&quot;<span
+class=SpellE>th</span>&quot;</span>时<span lang=EN-US>,</span>那么<span
+class=SpellE><span lang=EN-US>subcmd</span></span>取值如下定义<span lang=EN-US>:<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;<span class=SpellE>enum</span>&quot; : <span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;</span></span><span
+style='color:green'>枚举指定进程的所有线程<span lang=EN-US>.</span></span><span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;get&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: <span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;</span></span><span
+style='color:green'>获取指定线程的详细信息<span lang=EN-US>.(</span>句柄值<span lang=EN-US>,</span>优先级<span
+lang=EN-US>,ETHREAD,TEB,win32StartAddresss,</span>线程地址所在的模块名<span lang=EN-US>,</span>交换次数<span
+lang=EN-US>,</span>线程状态<span lang=EN-US>,</span>挂起次数<span lang=EN-US>)</span></span><span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;resume&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: </span><span
+style='color:green'>恢复指定的线程<span lang=EN-US>.</span>不可操作本线程<span lang=EN-US>. </span>当<span
+class=SpellE><span lang=EN-US>suspend_count</span></span>大于<span lang=EN-US>0</span>时<span
+lang=EN-US>,</span>每调用一次<span lang=EN-US>resume,</span>都会让<span class=SpellE><span
+lang=EN-US>suspend_count</span></span>减<span lang=EN-US>1,</span>直到<span
+lang=EN-US>0</span>为止才会真正的恢复线程<span lang=EN-US>.</span></span><span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;suspend&quot;:<span style='mso-spacerun:yes'>&nbsp; </span></span><span
+style='color:green'>挂起指定线程<span lang=EN-US>.</span>不可操作本线程<span lang=EN-US>.<br>
+<span style='mso-tab-count:7'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span
+lang=EN-US>&quot;terminate&quot;:</span><span style='color:green'>结束指定线程<span
+lang=EN-US>.</span>不可操作本线程<span lang=EN-US>.</span></span><span lang=EN-US></span></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>param</span></span><span
+lang=EN-US style='font-size:13.5pt'> </span><span style='font-size:13.5pt;
+color:gray'>字符串<span lang=EN-US>:</span></span><span lang=EN-US
+style='font-size:13.5pt'> </span><span style='font-size:13.5pt'>参数信息<span
+lang=EN-US>,</span>这里具体的含义取决于<span class=SpellE><span lang=EN-US>cmd</span></span>和<span
+class=SpellE><span lang=EN-US>subcmd</span></span><span lang=EN-US>. </span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='mso-spacerun:yes'>&nbsp; </span></span><span style='font-size:13.5pt'>如果<span
+class=SpellE><span lang=EN-US>cmd</span></span>为<span lang=EN-US>&quot;<span
+class=SpellE>gr</span>&quot;</span>时<span lang=EN-US>,<span class=SpellE>subcmd</span></span>取值为如下时，具体的参数含义<span
+lang=EN-US>:<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;<span class=SpellE>enum</span>&quot; : <span class=SpellE>param</span></span>为<span
+lang=EN-US>&quot;<span class=SpellE>pid</span>&quot;, <span class=SpellE>pid</span></span>为进程<span
+lang=EN-US>pid,10</span>进制形式<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;get&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: <span
+class=SpellE>param</span></span>为<span lang=EN-US>&quot;<span class=SpellE>pid</span>
+<span class=SpellE>handle&quot;,pid</span></span>为进程<span lang=EN-US>pid,10</span>进制形式<span
+lang=EN-US>,handle</span>为句柄值<span lang=EN-US>,10</span>进制形式<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;set&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: <span
+class=SpellE>param</span></span>为<span lang=EN-US>&quot;<span class=SpellE>pid</span>
+handle <span class=SpellE>access&quot;,pid</span></span>为进程<span lang=EN-US>pid,10</span>进制形式<span
+lang=EN-US>,handle</span>为句柄值<span lang=EN-US>,10</span>进制形式<span lang=EN-US>,access</span>为权限值<span
+lang=EN-US>,10</span>进制形式<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;close&quot;: <span class=SpellE>param</span></span>为<span
+lang=EN-US>&quot;<span class=SpellE>pid</span> handle&quot;, <span
+class=SpellE>pid</span></span>为进程<span lang=EN-US>pid,10</span>进制形式<span
+lang=EN-US>,handle</span>为句柄值<span lang=EN-US>,10</span>进制形式<span lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'><span style='mso-tab-count:3'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='mso-spacerun:yes'>&nbsp; </span></span><span style='font-size:13.5pt'>如果<span
+class=SpellE><span lang=EN-US>cmd</span></span>为<span lang=EN-US>&quot;<span
+class=SpellE>th</span>&quot;</span>时<span lang=EN-US>,<span class=SpellE>subcmd</span></span>取值为如下时，具体的参数含义<span
+lang=EN-US>:<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;<span class=SpellE>enum</span>&quot; : <span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;</span><span class=SpellE>param</span></span>为<span
+lang=EN-US>&quot;<span class=SpellE>pid</span>&quot;, <span class=SpellE>pid</span></span>为进程<span
+lang=EN-US>pid,10</span>进制形式<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;get&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: <span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;</span><span class=SpellE>param</span></span>为<span
+lang=EN-US>&quot;<span class=SpellE>tid</span>&quot;, <span class=SpellE>tid</span></span>为线程<span
+lang=EN-US>tid,10</span>进制形式<span lang=EN-US>. <br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;resume&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: <span
+style='mso-spacerun:yes'>&nbsp;</span><span class=SpellE>param</span></span>为<span
+lang=EN-US>&quot;<span class=SpellE>tid</span>&quot;, <span class=SpellE>tid</span></span>为线程<span
+lang=EN-US>tid,10</span>进制形式<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;suspend&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: <span
+class=SpellE>param</span></span>为<span lang=EN-US>&quot;<span class=SpellE>tid</span>&quot;,
+<span class=SpellE>tid</span></span>为线程<span lang=EN-US>tid,10</span>进制形式<span
+lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;terminate&quot;: <span class=SpellE>param</span></span>为<span
+lang=EN-US>&quot;<span class=SpellE>tid</span>&quot;, <span class=SpellE>tid</span></span>为线程<span
+lang=EN-US>tid,10</span>进制形式<span lang=EN-US>.</span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>返回值<span lang=EN-US>:</span></span></span><span
+lang=EN-US style='font-size:13.5pt'></span></p>
+
+<p><span style='font-size:13.5pt;color:gray'>字符串<span lang=EN-US>:</span></span><span
+lang=EN-US style='font-size:13.5pt'> </span><span style='font-size:13.5pt'>根据不同的<span
+class=SpellE><span lang=EN-US>cmd</span></span>和<span class=SpellE><span
+lang=EN-US>subcmd</span></span><span lang=EN-US>,</span>返回值不同<span lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:13.5pt'>如果<span class=SpellE><span
+lang=EN-US>cmd</span></span>为<span lang=EN-US>&quot;<span class=SpellE>gr</span>&quot;</span>时<span
+lang=EN-US>,<span class=SpellE>subcmd</span></span>取值为如下时，具体的返回值<span
+lang=EN-US>:<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;<span class=SpellE>enum</span>&quot; : &quot;handle1|handle2|.....|<span
+class=SpellE>handlen</span>&quot;,</span>每个<span lang=EN-US>handle</span>都是<span
+lang=EN-US>10</span>进制长整数<span lang=EN-US>. </span>如果失败返回空字符串<span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;get&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: &quot;<span
+class=SpellE>type|name|access</span>&quot;. type</span>表示句柄的类型，比如<span
+lang=EN-US>&quot;<span class=SpellE>Event&quot;,&quot;File</span>&quot;</span>等之类的<span
+lang=EN-US>. name</span>表示句柄的名字<span lang=EN-US>,</span>有些句柄的名字可能是空的<span
+lang=EN-US>. access10</span>进制整数<span lang=EN-US>,</span>表示此句柄的权限值<span
+lang=EN-US>. </span>如果失败返回空字符串<span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;set&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: </span>成功返回<span
+lang=EN-US>&quot;ok&quot;,</span>否则为空字符串<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='mso-spacerun:yes'>&nbsp;</span>&quot;close&quot;: </span>成功返回<span
+lang=EN-US>&quot;ok&quot;,</span>否则为空字符串<span lang=EN-US>.</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:13.5pt'>如果<span class=SpellE><span
+lang=EN-US>cmd</span></span>为<span lang=EN-US>&quot;<span class=SpellE>th</span>&quot;</span>时<span
+lang=EN-US>,<span class=SpellE>subcmd</span></span>取值为如下时，具体的返回值<span
+lang=EN-US>:<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;<span class=SpellE>enum</span>&quot; : &quot;tid1|tid2|.....|<span
+class=SpellE>tidn</span>&quot;,</span>每个<span class=SpellE><span lang=EN-US>tid</span></span>都是<span
+lang=EN-US>10</span>进制整数<span lang=EN-US>. </span>如果失败返回空字符串<span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;get&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: &quot;tid|prority|ethread|teb|win32StartAddress|module_name|switch_count|state|suspend_count&quot;.</span>如果失败返回空字符串<span
+lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=SpellE>tid</span> : </span>线程<span lang=EN-US>tid,10</span>进制整数<span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span
+class=SpellE>prority</span> : </span>线程优先级<span lang=EN-US>, 10</span>进制整数<span
+lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=SpellE>ethread</span> : </span>线程内核对象<span lang=EN-US>ETHREAD</span>指针<span
+lang=EN-US>. 64</span>位<span lang=EN-US>16</span>进制整数<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=SpellE>teb</span> : </span>线程内核对象<span lang=EN-US>TEB</span>指针<span
+lang=EN-US>. 64</span>位<span lang=EN-US>16</span>进制整数<span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>win32StartAddress : </span>线程起始地址<span lang=EN-US>. 64</span>位<span
+lang=EN-US>16</span>进制整数<span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=SpellE>module_name</span> : </span>线程起始地址所在的模块名<span
+lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=SpellE>switch_count</span> : </span>线程切换次数<span lang=EN-US>.
+10</span>进制整数<span lang=EN-US><br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>state : </span>线程状态<span lang=EN-US>. 10</span>进制整数<span lang=EN-US>. 0
+: </span>初始化<span lang=EN-US> 1 : </span>准备<span lang=EN-US> 2 : </span>运行<span
+lang=EN-US> 3 : </span>待机<span lang=EN-US> 4 : </span>结束<span lang=EN-US> 5 : </span>等待<span
+lang=EN-US> 6 : </span>转换<span lang=EN-US>. </span>这个地方其实只需要关心是不是<span
+lang=EN-US>4</span>就行了<span lang=EN-US>. </span>如果是<span lang=EN-US>4</span>表示线程结束了<span
+lang=EN-US>. </span>其它的状态都可以认为是运行状态<span lang=EN-US>. </span>不用太关心<span
+lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=SpellE>suspend_count</span> : </span>线程挂起次数<span lang=EN-US>.
+10</span>进制整数<span lang=EN-US>. </span>线程挂起次数<span lang=EN-US>,</span>当此值大于<span
+lang=EN-US>0</span>时<span lang=EN-US>,</span>表示线程处于挂起状态<span lang=EN-US>. </span>等于<span
+lang=EN-US>0</span>表示处于运行状态<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;resume&quot;<span style='mso-spacerun:yes'>&nbsp; </span>: </span>成功返回<span
+lang=EN-US>&quot;ok&quot;,</span>否则为空字符串<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='mso-spacerun:yes'>&nbsp;</span>&quot;suspend&quot;: </span>成功返回<span
+lang=EN-US>&quot;ok&quot;,</span>否则为空字符串<span lang=EN-US>.<br>
+<span
+style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>&quot;terminate&quot;: </span>成功返回<span lang=EN-US>&quot;ok&quot;,</span>否则为空字符串<span
+lang=EN-US>.</span></span></p>
+
+<p><span class=style11><span style='font-size:13.5pt'>示例<span lang=EN-US>:</span></span></span><b><span
+lang=EN-US style='font-size:13.5pt;color:blue'></span></b></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>// </span><span style='font-size:
+13.5pt'>枚举进程的所有句柄<span lang=EN-US>,</span>并获取此句柄的信息<span lang=EN-US>,</span>并打印出来<span
+lang=EN-US> <br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuard</span>(1,&quot;gr&quot;)<br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;gr&quot;,&quot;enum&quot;,&quot;1024&quot;)<br>
+<br>
+If <span class=SpellE>len</span>(<span class=SpellE>dm_ret</span>) &gt; 0 Then<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span><span class=SpellE>ss</span>
+= split(<span class=SpellE>dm_ret</span>,&quot;|&quot;)<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>index = 0<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>count = <span class=SpellE>UBound</span>(<span
+class=SpellE>ss</span>) + 1<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Do While index &lt; count<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;</span><span class=SpellE>dm_ret</span> = <span
+class=SpellE>dm.DmGuardParams</span>(&quot;gr&quot;,&quot;get&quot;,&quot;1024
+&quot; &amp; <span class=SpellE>ss</span>(index))<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>TracePrint</span> <span class=SpellE>dm_ret</span><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>index =
+index +1<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Loop<br>
+End If</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>// </span><span style='font-size:
+13.5pt'>关闭指定进程的句柄<span lang=EN-US><br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuard</span>(1,&quot;gr&quot;)<br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;gr&quot;,&quot;close&quot;,&quot;1024
+240&quot;)<br>
+<span class=SpellE>TracePrint</span> <span class=SpellE>dm_ret</span></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>// </span><span style='font-size:
+13.5pt'>修改指定进程的句柄的权限<span lang=EN-US><br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuard</span>(1,&quot;gr&quot;)<br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;gr&quot;,&quot;set&quot;,&quot;1024
+240 12345&quot;)<br>
+<span class=SpellE>TracePrint</span> <span class=SpellE>dm_ret</span><br>
+<br>
+// </span>枚举进程的所有线程<span lang=EN-US>,</span>并把线程的信息都打印出来<span lang=EN-US><br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuard</span>(1,&quot;th&quot;)<br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;th&quot;,&quot;enum&quot;,&quot;1024&quot;)<br>
+<br>
+If <span class=SpellE>len</span>(<span class=SpellE>dm_ret</span>) &gt; 0 Then<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span><span class=SpellE>ss</span>
+= split(<span class=SpellE>dm_ret</span>,&quot;|&quot;)<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>index = 0<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>count = <span class=SpellE>UBound</span>(<span
+class=SpellE>ss</span>) + 1<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Do While index &lt; count<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span><span
+style='mso-spacerun:yes'>&nbsp;&nbsp;</span><span class=SpellE>dm_ret</span> = <span
+class=SpellE>dm.DmGuardParams</span>(&quot;<span class=SpellE>th&quot;,&quot;get&quot;,ss</span>(index))<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+class=SpellE>TracePrint</span> <span class=SpellE>dm_ret</span><br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>index =
+index +1<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Loop<br>
+End If</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>// </span><span style='font-size:
+13.5pt'>结束指定线程<span lang=EN-US>. </span>注意后面的<span lang=EN-US>338</span>是线程<span
+class=SpellE><span lang=EN-US>tid</span></span><span lang=EN-US>. </span>不是进程<span
+class=SpellE><span lang=EN-US>pid</span></span><span lang=EN-US><br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;th&quot;,&quot;terminate&quot;,&quot;338&quot;)<br>
+// </span>挂起指定线程<span lang=EN-US><br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;th&quot;,&quot;suspend&quot;,&quot;338&quot;)<br>
+// </span>恢复指定线程<span lang=EN-US><br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuardParams</span>(&quot;th&quot;,&quot;resume&quot;,&quot;338&quot;)</span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>注<span lang=EN-US>: <span
+class=SpellE>gr</span></span>盾对应的这些<span class=SpellE><span lang=EN-US>subcmd</span></span><span
+lang=EN-US>,</span>其实最主要的目的是<span lang=EN-US>&quot;set&quot;, </span>设置句柄权限<span
+lang=EN-US>.<br>
+</span>比如场景<span lang=EN-US>1: <br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span>我们需要打开进程，或者打开线程，文件等等，如果在打开进程的权限里写了最高权限，那么由于一些保护措施，往往会失败<span
+lang=EN-US>. </span>但是如果你降低一些权限，比如用最低权限，反而会成功<span lang=EN-US>. </span>所以我们可以先用低权限打开对应的句柄<span
+lang=EN-US>,</span>然后用<span lang=EN-US>&quot;set&quot;</span>来提权，这样就相当于用间接的方式用最高权限打开了句柄<span
+lang=EN-US>.</span></span></p>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>再比如场景<span lang=EN-US>2:<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span>某些时候，有坏人打开我们自己的进程来做一些非法的事情<span
+lang=EN-US>,</span>这时候我们可以通过扫描<span lang=EN-US>(&quot;<span class=SpellE>enum</span>&quot;</span>功能<span
+lang=EN-US>),</span>来检查是否有关我们进程的句柄<span lang=EN-US>,</span>如果有的话，我们可以考虑直接关闭句柄<span
+lang=EN-US>(&quot;close&quot;),</span>或者给他降低权限<span lang=EN-US>(&quot;set&quot;).</span></span></p>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>其它场景，请自行脑补<span lang=EN-US>. </span>可能又有人会问<span
+lang=EN-US>,</span>我怎么知道设定的权限值到底是多少呢？ 这个很简单。 每种句柄都对应不同的权限，我们可以自己创建一个最高权限的句柄，来获取<span
+lang=EN-US>(&quot;get&quot;)</span>这个句柄的信息，就知道最高权限对应的权限到底是多少<span lang=EN-US>. </span>同样最低权限也一样。
+这里一定要注意<span lang=EN-US>,</span>不同类型的句柄<span lang=EN-US>,</span>权限定义是不同的<span
+lang=EN-US>. </span>比如<span lang=EN-US>&quot;Event&quot;</span>和<span
+lang=EN-US>&quot;File&quot;</span>就是完全不同的权限值<span lang=EN-US>.</span></span></p>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>这里对进程句柄举个例子<span lang=EN-US>. </span>比如我们想获取最高权限的进程句柄权限值<span
+lang=EN-US>,</span>那么操作如下<span lang=EN-US><br>
+</span></span><span lang=EN-US style='font-size:13.5pt'>// </span><span
+style='font-size:13.5pt'>我们打开进程<span lang=EN-US>id</span>为<span lang=EN-US>1024</span>的句柄<span
+lang=EN-US>, 1024</span>只是一个例子，必须换成真实存在的<span class=SpellE><span lang=EN-US>pid</span></span><span
+lang=EN-US><br>
+handle = <span class=SpellE>dm.OpenProcess</span>(1024)<br>
+<span class=SpellE>dm_ret</span> = <span class=SpellE>dm.DmGuard</span>(1,&quot;gr&quot;)<br>
+<span class=SpellE>my_pid</span> = <span class=SpellE>GetCurrentProcessId</span>()
+// </span>这个<span class=SpellE><span lang=EN-US>GetCurrentProcessId</span></span>是调用系统<span
+lang=EN-US>API</span>，获取当前进程<span lang=EN-US>ID</span>，因为打开的句柄在本进程里<span
+lang=EN-US><br>
+info = <span class=SpellE>dm.DmGuardParams</span>(&quot;<span class=SpellE>gr&quot;,&quot;get&quot;,cstr</span>(<span
+class=SpellE>my_pid</span>)&amp; &quot; &quot; &amp; <span class=SpellE>cstr</span>(handle))<br>
+<span class=SpellE>ss</span> = split(info,&quot;|&quot;)<br>
+access = <span class=SpellE>clng</span>(<span class=SpellE>ss</span>(2))<br>
+// </span>那么这里的<span lang=EN-US>access</span>就是最高权限的值了<span lang=EN-US>. </span></span></p>
+
+<p><span style='font-size:13.5pt;color:fuchsia'>一般来说<span lang=EN-US>,</span>每种句柄权限在不同系统里的定义都是相同的<span
+lang=EN-US>. </span>所以你可以在一个系统里获取到后，在其它系统里也是通用的<span lang=EN-US>.</span></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt;color:fuchsia'>ps</span></span><span
+lang=EN-US style='font-size:13.5pt;color:fuchsia'> : </span><span
+style='font-size:13.5pt;color:fuchsia'>上次有人问我，如何把一个别人正在读写的文件给强行打开读写，其实也是一个权限的事<span
+lang=EN-US>,</span>增加一个<span lang=EN-US>SHARE_READ</span>和<span lang=EN-US>SHARE_WRITE</span>就<span
+lang=EN-US>OK</span>了<span lang=EN-US>. </span>具体方法和上面这个进程句柄大同小异<span
+lang=EN-US>.</span></span></p>
+
+</div>
+
+</body>
+
+</html>

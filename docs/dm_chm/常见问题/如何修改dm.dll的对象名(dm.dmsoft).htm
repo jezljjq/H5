@@ -1,0 +1,111 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/rec-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>如何修改dm.dll的对象名(dm.dmsoft)</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style="tab-interval: 21.0pt">
+
+<div class=Section1>
+
+<p><span style="FONT-SIZE: 13.5pt">此方法可以更改插件在注册表的注册信息<span lang=EN-US>,</span>避免恶意检测<span
+ lang=EN-US>.<br>
+</span><span style="COLOR: red">注<span lang=EN-US>:</span>此方法从<span lang=EN-US>4.1324</span>以后不再支持，取而代之通过定制插件来实现<span
+ lang=EN-US>.</span></span></span></p><span style="FONT-SIZE: 13.5pt"><span style="COLOR: red"><span
+ lang=EN-US>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>何为定制:</SPAN></FONT></SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>定制的意思是按你提供的参数来制作专用的DLL文件.比如提供专用的主对象和副对象名字.而不是像外部一样都是dm.soft</SPAN></FONT></SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>如:外部版文件都一样的是dm.dll文件特征如md5都一样, 
+定制版是通过你提交的主副对象名来制作专用dll文件.而从改变特征.</SPAN></FONT></SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>定制版参考视频<A href="https://www.bilibili.com/video/BV1Cr4y197qD/ " 
+target=_blank>大漠插件普通定制版内存调用与com对象调用方法_</A><U><FONT color=#0066cc>&nbsp;&nbsp;<SPAN>&nbsp;</SPAN><A 
+href="https://www.bilibili.com/video/BV1Cr4y197qD/">https://www.bilibili.com/video/BV1Cr4y197qD/</A>&nbsp;&nbsp;</FONT></U></SPAN></FONT></SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><SPAN lang=EN-US><U><FONT color=#0066cc></FONT></U></SPAN></SPAN></SPAN>&nbsp;</P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><SPAN lang=EN-US><FONT color=#0066cc></FONT></SPAN></SPAN></SPAN>&nbsp;</P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>定制方法:</SPAN></FONT></SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>1.通过作者后台消费达到一定数目后会出现定制权限.定制后还是按注册码扣费的.只是定制文件</SPAN></FONT></SPAN></SPAN></P>
+<P 
+style="FONT-SIZE: medium; FONT-FAMILY: 宋体; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FONT-WEIGHT: 400; COLOR: rgb(0,0,0); FONT-STYLE: normal; MARGIN-LEFT: 0cm; ORPHANS: 2; WIDOWS: 2; LETTER-SPACING: normal; MARGIN-RIGHT: 0cm; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><SPAN 
+style="FONT-SIZE: 13.5pt"><SPAN style="COLOR: red"><FONT color=#000000><SPAN 
+lang=EN-US>2.通过易语言吧代定制eyy8.taobao.com 
+无须达到指定数目.</SPAN></FONT></SPAN></SPAN></P></span></span><span lang=EN-US></span></span>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/rec-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>无标题文档</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>这是一个很常见的问题，不同机器，由于系统的不同或者软件设置的差异，会导致文字颜色，字体等可能存在不同。<span
+lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>一般来说解决这个问题，以前的办法是这样，利用<span
+lang=EN-US>Capture</span>函数，比如<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>dm_ret =
+dm.FindStr(0,0,2000,2000,&quot;</span><span style='font-size:13.5pt'>长安<span
+lang=EN-US>&quot;,&quot;ffffff-000000&quot;,1.0,x,y)<br>
+if x &lt; 0 then<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>dm_ret =
+dm.Capture(0,0,2000,2000,&quot;screen.bmp&quot;)<br>
+end if<br>
+</span>这样当找不到长安时，就会截图保存为<span lang=EN-US>screen.bmp</span>，然后作者可以分析这个文件，来对自己的字库或者代码进行调节优化<span
+lang=EN-US>.</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>但这个办法有个延后性的问题，因为<span
+lang=EN-US>FindStr</span>和<span lang=EN-US>Capture</span>是两个操作，分别调用了两次截屏，所以可能会有稍许不一致的情况存在<span
+lang=EN-US>.</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>为了完完全全的对<span lang=EN-US>FindStr</span>时，产生的截图进行分析，我们需要用到<span
+lang=EN-US>2.1131</span>版本提供的两个函数。<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>CapturePre</span><span
+style='font-size:13.5pt'>和<span lang=EN-US>EnableDisplayDebug.</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:13.5pt'>那么代码如下<span lang=EN-US></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:13.5pt'>dm.EnableDisplayDebug
+1<br>
+dm_ret = dm.FindStr(0,0,2000,2000,&quot;</span><span style='font-size:13.5pt'>长安<span
+lang=EN-US>&quot;,&quot;ffffff-000000&quot;,1.0,x,y)<br>
+if x &lt; 0 then<br>
+<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>dm_ret =
+dm.CapturePre(&quot;screen.bmp&quot;)<br>
+end if<br>
+<br>
+</span>这样就把<span lang=EN-US>FindStr</span>时的截图保存下来了，就完全恢复了现场<span lang=EN-US>. </span>因为<span
+lang=EN-US>CapturePre</span>这个函数是截取上一次的截图数据<span lang=EN-US>.<span
+style='color:red'></span></span></span></p>
+
+</div>
+
+</body>
+
+</html>

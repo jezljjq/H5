@@ -1,0 +1,102 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/rec-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<title>无标题文档</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:SimSun;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 680460288 22 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:宋体;
+	mso-bidi-font-family:宋体;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='tab-interval:21.0pt'>
+
+<div class=Section1>
+
+<p><span style='font-size:13.5pt'>出现这种错误，一般是你的代码给插件传递的参数有明显的错误<span lang=EN-US>,</span>帮助调试脚本很有用<span
+lang=EN-US>.</span></span></p>
+
+<p><span style='font-size:13.5pt'>比如<span class=SpellE><span lang=EN-US>FindStr</span></span>函数<span
+lang=EN-US></span></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>dm_ret</span></span><span
+lang=EN-US style='font-size:13.5pt'> = <span class=SpellE>dm.FindStr</span>(20,0,10,100,&quot;abc&quot;,&quot;000000-000000&quot;,1.0,x,y)</span></p>
+
+<p><span style='font-size:13.5pt'>这样显然<span lang=EN-US>x1(20) &gt;= x2(10) </span>这显然是错误的
+<span lang=EN-US></span></span></p>
+
+<p><span style='font-size:13.5pt'>再比如<span lang=EN-US></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>d<span class=SpellE>m_ret</span> =
+<span class=SpellE>dm.FindStr</span>(-2000,0,-1000,100,&quot;abc&quot;,&quot;000000-000000&quot;,1.0,x,y)</span></p>
+
+<p><span style='font-size:13.5pt'>这样显然<span lang=EN-US>x2</span>小于<span
+lang=EN-US>0 </span>这也是明显错误 不可能有这样的情况出现<span lang=EN-US></span></span></p>
+
+<p><span style='font-size:13.5pt'>等等类似的错误<span lang=EN-US></span></span></p>
+
+<p><span lang=EN-US style='font-size:13.5pt'>&nbsp;</span></p>
+
+<p><span style='font-size:13.5pt'>如果不想显示这样的信息，可以调用插件的接口<span class=SpellE><span
+lang=EN-US>SetShowErrorMsg</span></span>来屏蔽这些错误<span lang=EN-US></span></span></p>
+
+<p><span style='font-size:13.5pt'>比如<span lang=EN-US></span></span></p>
+
+<p><span class=SpellE><span lang=EN-US style='font-size:13.5pt'>dm.SetShowErrorMsg</span></span><span
+lang=EN-US style='font-size:13.5pt'> 0</span></p>
+
+</div>
+
+</body>
+
+</html>
