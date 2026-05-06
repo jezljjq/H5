@@ -24,3 +24,11 @@ claude/
 ui_*preview*.png
 *_preview.png
 .claude/
+# Generated check files
+H5_current_check.zip
+test_result_current.txt
+compile_result_current.txt
+git_status_current.txt
+git_diff_stat_current.txt
+git_diff_name_status_current.txt
+ui_*_current.png
