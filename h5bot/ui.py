@@ -57,6 +57,7 @@ try:
         QSpinBox,
         QTableWidget,
         QTableWidgetItem,
+        QTabWidget,
         QTextEdit,
         QVBoxLayout,
         QWidget,
@@ -460,27 +461,21 @@ class MainWindow(QMainWindow):
         self.selected_window_summary_label.setWordWrap(True)
         left.addWidget(self.selected_window_summary_label)
 
-        center_panel, center = self._panel("任务模板与窗口任务队列")
+        center_panel, center = self._panel("任务模板库 + 当前窗口任务队列")
         # 内部任务选择控件（隐藏，仅用于任务追踪和模板库索引）
-        self.plan_combo = QComboBox(center_panel)
-        self.task_combo = QComboBox(center_panel)
-        self.task_type_combo = QComboBox(center_panel)
+        self.plan_combo = QComboBox()
+        self.task_combo = QComboBox()
+        self.task_type_combo = QComboBox()
         self.task_type_combo.addItem("普通流程任务", FLOW_TASK_TYPE)
         self.task_type_combo.addItem("自动抢拍任务", AUCTION_TASK_TYPE)
-        for widget in [self.plan_combo, self.task_combo, self.task_type_combo]:
-            widget.setVisible(False)
-        self.add_plan_button = QPushButton("新增方案", center_panel)
-        self.rename_plan_button = QPushButton("重命名方案", center_panel)
-        self.delete_plan_button = QPushButton("删除方案", center_panel)
+        self.add_plan_button = QPushButton("新增方案")
+        self.rename_plan_button = QPushButton("重命名方案")
+        self.delete_plan_button = QPushButton("删除方案")
         self.delete_plan_button.setObjectName("dangerButton")
-        for button in [self.add_plan_button, self.rename_plan_button, self.delete_plan_button]:
-            button.setVisible(False)
-        self.add_task_button = QPushButton("新增任务", center_panel)
-        self.copy_task_button = QPushButton("复制任务", center_panel)
-        self.delete_task_button = QPushButton("删除任务", center_panel)
+        self.add_task_button = QPushButton("新增任务")
+        self.copy_task_button = QPushButton("复制任务")
+        self.delete_task_button = QPushButton("删除任务")
         self.delete_task_button.setObjectName("dangerButton")
-        for button in [self.add_task_button, self.copy_task_button, self.delete_task_button]:
-            button.setVisible(False)
         queue_board = QHBoxLayout()
         template_column = QVBoxLayout()
         template_column.addWidget(QLabel("可选任务（模板库）"))
@@ -580,7 +575,10 @@ class MainWindow(QMainWindow):
         step_actions.addWidget(self.move_step_up_button)
         step_actions.addWidget(self.move_step_down_button)
         flow_workspace_layout.addLayout(step_actions)
-        center.addWidget(self.flow_workspace, 1)
+        self.config_tabs = QTabWidget()
+        self.config_tabs.addTab(self.flow_workspace, "普通流程配置")
+        self.config_tabs.addTab(self.auction_workspace, "自动抢拍配置")
+        center.addWidget(self.config_tabs, 1)
 
         right_column = QWidget()
         right_column_layout = QVBoxLayout(right_column)
@@ -776,7 +774,6 @@ class MainWindow(QMainWindow):
         self.auction_workspace.setWidgetResizable(True)
         self.auction_workspace.setFrameShape(QFrame.NoFrame)
         self.auction_workspace.setWidget(auction_panel)
-        center.addWidget(self.auction_workspace, 1)
 
         log_panel, log_layout = self._panel("运行日志")
         self.status_label = QLabel("未运行")
@@ -1108,7 +1105,7 @@ class MainWindow(QMainWindow):
         self.task_template_list.clear()
         for plan in self.config.task_plans:
             for task in plan.tasks:
-                label = f"{task.name} | {task_type_label(task.task_type)}"
+                label = f"{task.name}（{task_type_label(task.task_type)}）"
                 item = QListWidgetItem(label)
                 item.setData(Qt.UserRole, (plan.name, task.name))
                 self.task_template_list.addItem(item)
@@ -1187,8 +1184,8 @@ class MainWindow(QMainWindow):
     def _sync_workspace_to_task_type(self) -> None:
         task = self._selected_task()
         is_auction = bool(task and (task.task_type or FLOW_TASK_TYPE) == AUCTION_TASK_TYPE)
-        self.flow_workspace.setVisible(not is_auction)
-        self.auction_workspace.setVisible(is_auction)
+        if hasattr(self, "config_tabs"):
+            self.config_tabs.setCurrentIndex(1 if is_auction else 0)
         self.detail_panel.setVisible(not is_auction)
         self.auction_status_panel.setVisible(is_auction)
         if is_auction:
@@ -1234,8 +1231,8 @@ class MainWindow(QMainWindow):
     def _refresh_task_type_visibility(self) -> None:
         is_auction = (self.task_type_combo.currentData() or FLOW_TASK_TYPE) == AUCTION_TASK_TYPE
         self.auction_panel.setVisible(is_auction)
-        self.auction_workspace.setVisible(is_auction)
-        self.flow_workspace.setVisible(not is_auction)
+        if hasattr(self, "config_tabs"):
+            self.config_tabs.setCurrentIndex(1 if is_auction else 0)
         self.detail_panel.setVisible(not is_auction)
         self.task_description_label.setVisible(False)
         self.templates_hint_label.setVisible(False)
@@ -2632,3 +2629,4 @@ def run_app() -> int:
     window = MainWindow()
     window.show()
     return app.exec_()
+                                                                                                                                                                                                                                                                                                                                         

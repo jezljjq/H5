@@ -231,7 +231,7 @@ class DmWindowSession:
             x1, y1, x2, y2 = _normalize_roi(roi)
             parent = template_paths[0].parent
             pic_name = "|".join(path.name for path in template_paths)
-            parent_text = str(parent)
+            parent_text = str(parent).replace("/", "\\")
             if parent_text != self._current_path:
                 self.dm.SetPath(parent_text)
                 self._current_path = parent_text
@@ -323,4 +323,4 @@ def _import_win32com_client():
         import win32com.client
     except ImportError as exc:
         raise RuntimeError("缺少 pywin32，请在 32 位 Python 中安装 pywin32") from exc
-    return win32com.client
+    retu
