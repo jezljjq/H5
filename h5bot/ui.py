@@ -228,8 +228,9 @@ class WindowPickerButton(QPushButton):
         super().__init__(text, parent)
         self.default_text = text
         self.setCursor(Qt.OpenHandCursor)
-        self.setToolTip("拖到游戏窗口后松开绑定")
-        self.setMinimumWidth(54)
+        self.setToolTip("拖动准星绑定窗口")
+        self.setFixedHeight(34)
+        self.setFixedWidth(36)
 
     def mousePressEvent(self, event) -> None:
         if event.button() != Qt.LeftButton:
@@ -352,8 +353,9 @@ class MainWindow(QMainWindow):
     window_started_signal = pyqtSignal(int)
     window_finished_signal = pyqtSignal(int, bool)
 
-    def __init__(self) -> None:
+    def __init__(self, preview_mode: bool = False) -> None:
         super().__init__()
+        self.preview_mode = preview_mode
         self.setWindowTitle("全自动辅助助手")
         self.resize(1320, 820)
         self.config = load_config(CONFIG_PATH)
@@ -409,7 +411,8 @@ class MainWindow(QMainWindow):
         toolbar = QHBoxLayout()
         toolbar.setSpacing(10)
         self.scan_button = QPushButton("扫描窗口")
-        self.pick_window_button = WindowPickerButton("绑定目标窗口")
+        self.pick_window_button = WindowPickerButton("◎")
+        self.pick_window_button.setToolTip("拖动准星绑定窗口")
         self.pick_window_button.setObjectName("crosshairButton")
         self.save_button = QPushButton("保存配置")
         self.test_button = QPushButton("测试识别")
@@ -418,7 +421,6 @@ class MainWindow(QMainWindow):
         self.pause_button = QPushButton("暂停")
         self.stop_button = QPushButton("停止")
         self.stop_button.setObjectName("dangerButton")
-        toolbar.addWidget(self._toolbar_group("窗口操作", [self.scan_button, self.pick_window_button]))
         toolbar.addWidget(self._toolbar_group("配置操作", [self.save_button, self.test_button]))
         toolbar.addWidget(self._toolbar_group("运行操作", [self.start_button, self.pause_button, self.stop_button]))
         toolbar.addStretch(1)
@@ -452,9 +454,6 @@ class MainWindow(QMainWindow):
         window_buttons_2.addWidget(self.remove_window_button)
         left.addLayout(window_buttons_2)
         left.addWidget(self.window_count_label)
-        self.window_list_header_label = QLabel("窗口标题 | 任务数 | 当前运行任务 | 状态")
-        self.window_list_header_label.setObjectName("mutedLabel")
-        left.addWidget(self.window_list_header_label)
         left.addWidget(self.window_list, 1)
         self.selected_window_summary_label = QLabel("选中窗口：无")
         self.selected_window_summary_label.setObjectName("taskDescription")
@@ -577,6 +576,10 @@ class MainWindow(QMainWindow):
         flow_workspace_layout.addLayout(step_actions)
         self.config_tabs = QTabWidget()
         self.config_tabs.addTab(self.flow_workspace, "普通流程配置")
+        self.auction_workspace = QScrollArea()
+        self.auction_workspace.setWidgetResizable(True)
+        self.auction_workspace.setFrameShape(QFrame.NoFrame)
+        self.auction_workspace.setWidget(QWidget())
         self.config_tabs.addTab(self.auction_workspace, "自动抢拍配置")
         center.addWidget(self.config_tabs, 1)
 
@@ -770,9 +773,6 @@ class MainWindow(QMainWindow):
         auction_actions.addWidget(self.start_auction_button)
         auction_actions.addWidget(self.stop_auction_button)
         auction_layout.addLayout(auction_actions)
-        self.auction_workspace = QScrollArea()
-        self.auction_workspace.setWidgetResizable(True)
-        self.auction_workspace.setFrameShape(QFrame.NoFrame)
         self.auction_workspace.setWidget(auction_panel)
 
         log_panel, log_layout = self._panel("运行日志")
@@ -941,10 +941,11 @@ class MainWindow(QMainWindow):
             QPushButton#dangerButton { color: #E53935; border-color: #F3B8B5; background: #FFF5F5; }
             QPushButton#dangerButton:hover { background: #FDECEC; border-color: #E53935; }
             QPushButton#crosshairButton {
-                font-size: 22px;
+                font-size: 16px;
                 font-weight: 700;
-                padding: 4px 10px;
-                min-width: 48px;
+                padding: 2px 6px;
+                min-width: 28px;
+                max-width: 36px;
             }
             QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
                 background: #FFFFFF;
@@ -1031,6 +1032,12 @@ class MainWindow(QMainWindow):
         self.stop_auction_button.clicked.connect(self.stop)
 
     def _init_backend(self) -> None:
+        if self.preview_mode:
+            self.window_count_label.setText("预览模式：模拟数据")
+            self.dm_status_label.setText("大漠: 预览模式")
+            self.log("UI 预览模式已启动，使用模拟窗口数据")
+            self._load_preview_data()
+            return
         try:
             self.backend = Win32Automation()
             self.window_count_label.setText("未添加窗口")
@@ -1044,6 +1051,38 @@ class MainWindow(QMainWindow):
             self.dm_status_label.setText("大漠: 不可用")
             self.log(str(exc))
             QMessageBox.warning(self, "依赖缺失", str(exc))
+
+    def _load_preview_data(self) -> None:
+        """Load mock data for UI preview (--ui-preview mode)."""
+        from collections import namedtuple
+
+        MockWindow = namedtuple("GameWindow", ["hwnd", "title"])
+
+        self.windows = [
+            MockWindow(1001, "斗罗大陆H5-1"),
+            MockWindow(1002, "斗罗大陆H5-2"),
+            MockWindow(1003, "斗罗大陆H5-3"),
+        ]
+
+        from h5bot.window_tasks import WindowQueuedTask
+
+        self.window_task_queues = {
+            1001: [
+                WindowQueuedTask("任务模板库", "神界中枢刷怪", FLOW_TASK_TYPE, True),
+                WindowQueuedTask("任务模板库", "自动抢拍任务", AUCTION_TASK_TYPE, True),
+            ],
+            1002: [
+                WindowQueuedTask("任务模板库", "每日任务", FLOW_TASK_TYPE, True),
+                WindowQueuedTask("任务模板库", "世界BOSS挑战", FLOW_TASK_TYPE, False),
+            ],
+            1003: [
+                WindowQueuedTask("任务模板库", "自动抢拍任务", AUCTION_TASK_TYPE, True),
+            ],
+        }
+        self.window_statuses = {1001: "空闲", 1002: "运行中", 1003: "空闲"}
+        self.window_current_tasks = {1001: "无", 1002: "每日任务", 1003: "无"}
+        self._refresh_window_list()
+        self._refresh_status_bar()
 
     def _load_config_to_ui(self) -> None:
         self.keyword_edit.setText(self.config.window_keyword)
@@ -2261,7 +2300,7 @@ class MainWindow(QMainWindow):
         current = self.window_current_tasks.get(window.hwnd, "无")
         if current == "-":
             current = "无"
-        return f"{window.title} | {len(queue)} | {current} | {status}"
+        return f"{window.title}  │ 任务 {len(queue)}  │ {current}  │ {status}"
 
     def _window_task_bindings_from_ui(self) -> dict[str, list[str]]:
         bindings = dict(self.config.window_task_bindings)
@@ -2624,9 +2663,11 @@ def _safe_filename_stem(value: str) -> str:
     return cleaned.strip(" .")
 
 
-def run_app() -> int:
+def run_app(preview_mode: bool = False) -> int:
     app = QApplication(sys.argv)
-    window = MainWindow()
+    app.setApplicationName("全自动辅助助手")
+    window = MainWindow(preview_mode=preview_mode)
     window.show()
+    if preview_mode:
+        window.log("UI 预览模式：未连接大漠，使用模拟数据")
     return app.exec_()
-                                                                                                                                                                                                                                                                                                                                         

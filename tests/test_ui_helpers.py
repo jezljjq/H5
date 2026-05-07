@@ -47,12 +47,43 @@ class UiHelperTests(unittest.TestCase):
         assert auto(10, 8, 12, 12, 100, 100) == [0, 0, 52, 50]
 
     def test_mouse_event_helpers_support_pyqt5_events(self):
-        *_, ep, egp = self._import()
+        _, _, egp, ep, _ = self._import()
         evt = _FakePyQtMouseEvent()
         assert ep(evt) == QPoint(10, 20)
         assert egp(evt) == QPoint(30, 40)
 
     def test_mouse_event_helpers_support_pyside_style_events(self):
-        *_, ep, egp = self._import()
+        _, _, egp, ep, _ = self._import()
         evt = _FakePySideMouseEvent()
-     
+        assert ep(evt) == QPoint(11, 21)
+        assert egp(evt) == QPoint(31, 41)
+
+
+# --- Fake event classes for testing ---
+
+class _FakePyQtMouseEvent:
+    def pos(self):
+        return QPoint(10, 20)
+
+    def globalPos(self):
+        return QPoint(30, 40)
+
+
+class _FakePySidePoint:
+    def __init__(self, point):
+        self.point = point
+
+    def toPoint(self):
+        return self.point
+
+
+class _FakePySideMouseEvent:
+    def position(self):
+        return _FakePySidePoint(QPoint(11, 21))
+
+    def globalPosition(self):
+        return _FakePySidePoint(QPoint(31, 41))
+
+
+if __name__ == "__main__":
+    unittest.main()

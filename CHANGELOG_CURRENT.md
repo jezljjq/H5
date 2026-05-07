@@ -2,7 +2,47 @@
 
 更新时间：2026-05-07
 
-## 当前未发布阶段变更（2026-05-07 修复轮次）
+## 当前未发布阶段变更（2026-05-07 UI 修正轮次）
+
+### 左侧准星绑定控件修复
+
+- 从大号文字按钮"绑定目标窗口"恢复为小型准星图标按钮 `◎`。
+- `WindowPickerButton` 改为固定尺寸 36×34px，不再设置 `setMinimumWidth(54)`。
+- 准星按钮样式从 `font-size: 22px; min-width: 48px` 改为 `font-size: 16px; min-width: 28px; max-width: 36px`。
+- Tooltip 改为"拖动准星绑定窗口"。
+
+### 关键 Bug 修复：auction_workspace 初始化顺序
+
+- `_build_ui()` 中 `self.config_tabs.addTab(self.auction_workspace, "自动抢拍配置")`（第 580 行）引用 `self.auction_workspace` 时该属性尚未初始化（实际在 773 行才创建），导致 AttributeError。
+- 修复：在 config_tabs 创建前提前初始化 `auction_workspace` 为占位 QScrollArea，后续再 `setWidget(auction_panel)` 填充实际内容。
+
+### 左侧窗口管理区
+
+- 移除顶部工具栏中重复的"窗口操作"分组（扫描窗口和准星按钮只在左侧面板保留，不在工具栏重复出现）。
+- 移除窗口列表表头标签 `"窗口标题 | 任务数 | 当前运行任务 | 状态"`。
+- 窗口列表项格式从 `"title | n | current | status"` 改为 `"title │ 任务 n │ current │ status"`。
+
+### UI 预览模式
+
+- 新增 `--ui-preview` 启动参数，支持在不初始化大漠、不扫描窗口的情况下预览 UI。
+- `main.py`：识别 `--ui-preview` 参数，传递给 `run_app(preview_mode=True)`。
+- `MainWindow.__init__`：新增 `preview_mode` 参数，`_init_backend` 在预览模式下降跳过后端初始化，调用 `_load_preview_data()` 加载 3 个模拟窗口和任务队列。
+- 模拟数据包括：3 个窗口（斗罗大陆H5-1 ~ H5-3），混合普通流程/自动抢拍任务队列。
+
+### 修改文件
+
+- `h5bot/ui.py` — 准星按钮修复、auction_workspace 初始化顺序修复、左侧面板优化、预览模式
+- `main.py` — 新增 `--ui-preview` 参数支持
+
+### 新增文件
+
+- 无。
+
+### 删除或移动文件
+
+- 无。
+
+## 之前阶段（2026-05-07 修复轮次）
 
 ### Git 工作区修复
 
@@ -129,4 +169,22 @@
 - 自动抢拍状态机调整为 S0-S7，新增 S1"进入拍卖界面"。
 - UI 按任务类型拆分工作台。
 - 自动抢拍配置从右侧移到中间主工作区。
--
+- 用户可见文案已中文化。
+
+### 窗口任务队列与混合调度
+
+- 新增 `h5bot/window_tasks.py`，统一管理窗口任务队列。
+- 新增 `window_task_queues`，运行模型调整为 `窗口 -> 任务队列 -> 队列任务`。
+- 旧 `window_task_bindings` 会兼容迁移为该窗口任务队列中的第一个任务。
+- 方案不再作为窗口运行时强制层级。
+- 中间主区域增加当前窗口任务队列的完整管理。
+- 主界面移除方案层级入口。
+- 任务模板库可见项只显示任务名和任务类型。
+- 开始全部改为遍历窗口自己的启用队列。
+
+## 最近验证（2026-05-07）
+
+- 单元测试：`py -3.14-32 -m unittest discover -s tests`，`Ran 70 tests`，`OK (skipped=6)`。
+- 编译检查：`py -3.14-32 -m compileall h5bot main.py tests`，通过。
+- 打包：最近一次通过（2026-05-06），本轮未重新打包。
+- 最终 EXE：`D:\Ai\codex\H5\dist\全自动辅助助手\全自动辅助助手.exe`。

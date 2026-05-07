@@ -32,3 +32,5 @@ git_status_current.txt
 git_diff_stat_current.txt
 git_diff_name_status_current.txt
 ui_*_current.png
+*.bundle
+push_updates.bat

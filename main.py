@@ -6,13 +6,15 @@ import sys
 
 
 def main() -> int:
-    if os.name == "nt" and not _is_running_as_admin():
+    ui_preview = "--ui-preview" in sys.argv
+
+    if not ui_preview and os.name == "nt" and not _is_running_as_admin():
         return _relaunch_as_admin()
     try:
         from h5bot.automation import DependencyError
         from h5bot.ui import run_app
 
-        return run_app()
+        return run_app(preview_mode=ui_preview)
     except Exception as exc:
         try:
             from h5bot.automation import DependencyError
