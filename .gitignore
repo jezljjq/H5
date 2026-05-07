@@ -34,3 +34,5 @@ git_diff_name_status_current.txt
 ui_*_current.png
 *.bundle
 push_updates.bat
+
+_cleanup_pending/
